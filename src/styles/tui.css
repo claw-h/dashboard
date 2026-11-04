@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --tui-bg: #0F0F11;
+  --tui-panel: #18181B;
+  --tui-border: #27272A;
+  --tui-text: #F4F4F5;
+  --tui-muted: #A1A1AA;
+  --tui-dim: #71717A;
+  --tui-clay: #E05C36;
+  --tui-orange: #EA580C;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #0F0F11;
+  color: #F4F4F5;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-feature-settings: "liga" 1, "calt" 1, "zero" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom sleek TUI scrollbars for inner panes */
+.tui-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.tui-scroll::-webkit-scrollbar-track {
+  background: #0F0F11;
+}
+
+.tui-scroll::-webkit-scrollbar-thumb {
+  background: #27272A;
+}
+
+.tui-scroll::-webkit-scrollbar-thumb:hover {
+  background: #E05C36;
+}
+
+@keyframes tui-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.animate-tui-cursor {
+  animation: tui-blink 1s step-end infinite;
+}
+
+/* Subtle CRT / terminal grid hairlines */
+.tui-box-shadow-active {
+  box-shadow: inset 0 0 0 1px rgba(224, 92, 54, 0.45);
+}
