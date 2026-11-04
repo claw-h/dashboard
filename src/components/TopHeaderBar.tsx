@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Dispatch } from 'react';
 import type { ScheduleAction } from '../state/scheduleEngine';
 import type { ScheduleState } from '../types/schedule';
@@ -17,6 +17,44 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
   const filterInputRef = useRef<HTMLInputElement | null>(null);
   const regexInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Randomized ~30s incremental pulse state for the YXB diamond emblem
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [pulseCount, setPulseCount] = useState(0);
+
+  useEffect(() => {
+    let timeoutId: number;
+    let clearPulseId: number;
+
+    const scheduleNextPulse = () => {
+      // Randomized ~30s interval (24,000ms to 36,000ms) with subtle incremental harmonic shift
+      const jitterMs = 24000 + Math.floor(Math.random() * 12000);
+      timeoutId = window.setTimeout(() => {
+        setPulseCount((c) => c + 1);
+        setIsPulsing(true);
+        clearPulseId = window.setTimeout(() => {
+          setIsPulsing(false);
+          scheduleNextPulse();
+        }, 1350);
+      }, jitterMs);
+    };
+
+    // Initial welcome pulse right after boot preloader unveils (1.6s)
+    const initialId = window.setTimeout(() => {
+      setPulseCount(1);
+      setIsPulsing(true);
+      clearPulseId = window.setTimeout(() => {
+        setIsPulsing(false);
+        scheduleNextPulse();
+      }, 1350);
+    }, 1600);
+
+    return () => {
+      window.clearTimeout(initialId);
+      window.clearTimeout(timeoutId);
+      window.clearTimeout(clearPulseId);
+    };
+  }, []);
+
   useEffect(() => {
     if (state.inputMode === 'FILTER_BAR') {
       filterInputRef.current?.focus();
@@ -27,6 +65,13 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
     }
   }, [state.inputMode]);
 
+  const triggerManualPulse = () => {
+    if (isPulsing) return;
+    setPulseCount((c) => c + 1);
+    setIsPulsing(true);
+    window.setTimeout(() => setIsPulsing(false), 1350);
+  };
+
   const allTasks = Object.values(state.tasks);
   const completedCount = allTasks.filter((t) => t.status === 'COMPLETED').length;
   const milestoneCount = allTasks.filter((t) => t.isMilestone).length;
@@ -36,30 +81,66 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
     <header className="h-11 bg-[#0F0F11] border-b border-zinc-800 px-3 flex items-center justify-between gap-2 text-xs select-none shrink-0">
       {/* Left: Bespoke YXB // CMD Emblem & Interactive ~/workspace Breadcrumb Dropdown Trigger */}
       <div className="flex items-center gap-2 min-w-0">
-        <div className="flex items-center gap-2 px-2.5 py-1 bg-[#18181B] border border-zinc-800 shrink-0">
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            className="shrink-0"
-            aria-hidden="true"
-          >
-            <polygon
-              points="12,2 22,12 12,22 2,12"
-              stroke="#E05C36"
-              strokeWidth="2"
-              fill="rgba(224,92,54,0.18)"
-            />
-            <circle cx="12" cy="12" r="2.5" fill="#F4F4F5" />
-          </svg>
+        <button
+          type="button"
+          onClick={triggerManualPulse}
+          title={`YXB // CMD Isometric Core (Pulse #${pulseCount})`}
+          className="flex items-center gap-2 px-2.5 py-1 bg-[#18181B] border border-zinc-800 hover:border-zinc-700 shrink-0 transition-colors"
+        >
+          <span className="relative flex items-center justify-center w-4 h-4">
+            {isPulsing && (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="absolute inset-0 -m-[2px] animate-yxb-diamond-ripple pointer-events-none"
+                aria-hidden="true"
+              >
+                <polygon
+                  points="12,2 22,12 12,22 2,12"
+                  stroke="#E05C36"
+                  strokeWidth="1.5"
+                  fill="none"
+                />
+              </svg>
+            )}
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              style={{
+                transform: !isPulsing
+                  ? `rotate(${(pulseCount * 90) % 360}deg)`
+                  : undefined,
+                transition: 'transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
+              }}
+              className={`shrink-0 ${isPulsing ? 'animate-yxb-diamond-pulse' : ''}`}
+              aria-hidden="true"
+            >
+              <polygon
+                points="12,2 22,12 12,22 2,12"
+                stroke="#E05C36"
+                strokeWidth="2"
+                fill={isPulsing ? 'rgba(224,92,54,0.42)' : 'rgba(224,92,54,0.18)'}
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r={isPulsing ? '3.2' : '2.5'}
+                fill="#F4F4F5"
+              />
+            </svg>
+          </span>
+
           <span className="font-bold tracking-wider text-[#F4F4F5]">
             YXB <span className="text-[#E05C36]">//</span> CMD
           </span>
           <span className="hidden sm:inline text-[10px] px-1 bg-zinc-900 border border-zinc-700 text-zinc-400">
             v3.0
           </span>
-        </div>
+        </button>
 
         <span className="text-zinc-700 hidden sm:inline">│</span>
 

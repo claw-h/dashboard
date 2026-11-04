@@ -1173,9 +1173,10 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
             .map((p) => {
               const pTasks = Object.values(state.tasks).filter((t) => t.projectId === p.id);
               const done = pTasks.filter((t) => t.status === 'COMPLETED').length;
-              return `${p.code} [${done}/${pTasks.length}] (${p.gitBranch ?? 'main'})`;
+              const pct = pTasks.length > 0 ? Math.round((done / pTasks.length) * 100) : 0;
+              return `◈ ${p.code.padEnd(9, ' ')} │ ${String(pct).padStart(3, ' ')}% (${done}/${pTasks.length}) │ ⎇ ${p.gitBranch ?? 'main'} │ ${p.localPath}`;
             })
-            .join(' │ ');
+            .join('\n');
           return {
             ...state,
             cliLogs: [
@@ -1186,20 +1187,40 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
                 type: 'TOOL_CALL',
                 scope: 'GLOBAL',
                 toolName: 'GlobalWorkspaceStatus',
-                summary: `GLOBAL SCOPE (${state.projects.length} repos in ~/Documents/Github):`,
+                summary: `GLOBAL WORKSPACE AUDIT (${state.projects.length} repositories in ~/Documents/Github):`,
                 detail: summaryLines,
               },
             ],
           };
         }
 
-        const pTasks = Object.values(state.tasks).filter(
-          (t) => t.projectId === state.selectedProjectId
-        );
+        const pTasks = Object.values(state.tasks)
+          .filter((t) => t.projectId === state.selectedProjectId)
+          .sort((a, b) => compareTasks(a, b, state.sortBy));
         const done = pTasks.filter((t) => t.status === 'COMPLETED').length;
-        const treeLines = pTasks
-          .map((t) => `${'  '.repeat(t.depth)}[L${t.depth}] ${t.id}: ${t.title} (${t.status})`)
-          .join(' || ');
+
+        const lines: string[] = [];
+        const walk = (parentId: string | null, prefix: string) => {
+          const kids = pTasks.filter((t) => t.parentId === parentId);
+          kids.forEach((node, idx) => {
+            const isLast = idx === kids.length - 1;
+            const branch = isLast ? '└─' : '├─';
+            const glyph =
+              node.status === 'COMPLETED'
+                ? '[✓]'
+                : node.status === 'IN_PROGRESS'
+                ? '[~]'
+                : node.status === 'BLOCKED'
+                ? '[!]'
+                : '[ ]';
+            const ms = node.isMilestone ? ' ◆' : '';
+            lines.push(
+              `${prefix}${branch} ${glyph} [L${node.depth}] ${node.id} :: ${node.title} (${node.priority})${ms}`
+            );
+            walk(node.id, prefix + (isLast ? '   ' : '│  '));
+          });
+        };
+        walk(null, '');
 
         return {
           ...state,
@@ -1212,8 +1233,8 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               scope: 'LOCAL',
               projectCode: activeProj?.code,
               toolName: 'LocalRepoStatus',
-              summary: `LOCAL SCOPE [${activeProj?.code}] ${activeProj?.localPath} — ${done}/${pTasks.length} completed | branch: ${activeProj?.gitBranch ?? 'main'}`,
-              detail: treeLines,
+              summary: `LOCAL SCOPE [${activeProj?.code}] ${activeProj?.localPath} — ${done}/${pTasks.length} completed | ⎇ ${activeProj?.gitBranch ?? 'main'}`,
+              detail: lines.join('\n'),
             },
           ],
         };
