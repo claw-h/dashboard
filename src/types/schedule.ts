@@ -8,6 +8,8 @@ export type ActivePanel = 'LEFT' | 'CENTER' | 'RIGHT';
 
 export type WorkspaceMode = 'SCHEDULE' | 'CLI_STREAM';
 
+export type CliScopeMode = 'LOCAL' | 'GLOBAL';
+
 export type ProjectLifecycle = 'PRODUCTION' | 'ACTIVE' | 'INCUBATING' | 'ARCHIVED';
 
 export type InputMode =
@@ -18,7 +20,8 @@ export type InputMode =
   | 'FILTER_BAR'
   | 'CLI_INPUT'
   | 'PROJECT_BROWSER'
-  | 'AGENT_PROTOCOL';
+  | 'AGENT_PROTOCOL'
+  | 'CLOUD_SYNC';
 
 export type StatusFilter = 'ALL' | 'IN_PROGRESS' | 'BLOCKED' | 'COMPLETED' | 'MILESTONES';
 
@@ -32,6 +35,9 @@ export interface Project {
   stack: string[];
   lifecycle: ProjectLifecycle;
   lastAgentSync?: string;
+  gitBranch?: string;
+  gitDirtyCount?: number;
+  lastCommit?: string;
   order: number;
   expanded: boolean;
 }
@@ -74,6 +80,8 @@ export interface CliLogEntry {
   id: string;
   timestamp: string;
   type: 'SYSTEM' | 'COMMAND' | 'MUTATION' | 'TOOL_CALL' | 'DIFF';
+  scope?: CliScopeMode;
+  projectCode?: string;
   command?: string;
   toolName?: string;
   summary: string;
@@ -99,11 +107,15 @@ export interface ScheduleState {
   selectedTaskId: string | null;
   selectedLeftIndex: number;
   selectedRightSubtaskId: string | null;
+  composerTargetParentId: string | null;
+  composerMode: 'ROOT' | 'SUBTASK';
   activeMode: WorkspaceMode;
+  cliScope: CliScopeMode;
   focusedPanel: ActivePanel;
   inputMode: InputMode;
   projectBrowserOpen: boolean;
   agentProtocolOpen: boolean;
+  cloudSyncOpen: boolean;
   leftPanelCollapsed: boolean;
   rightPanelExpanded: boolean;
   sortBy: SortCriterion;

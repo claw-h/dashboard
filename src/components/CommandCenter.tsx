@@ -12,6 +12,7 @@ import {
 } from '../state/storage';
 import { AgentProtocolModal } from './AgentProtocolModal';
 import { CenterWorkspace } from './CenterWorkspace';
+import { CloudSyncModal } from './CloudSyncModal';
 import { LeftPanelTree } from './LeftPanelTree';
 import { ProjectBrowserDropdown } from './ProjectBrowserDropdown';
 import { RightInspectorPanel } from './RightInspectorPanel';
@@ -87,17 +88,80 @@ export const CommandCenter: React.FC = () => {
       {/* Global Agent Context Protocol Modal [g] */}
       <AgentProtocolModal state={state} dispatch={dispatch} />
 
-      {/* Persistent 3-Column Split View separated by 1px solid border-zinc-800 */}
+      {/* Phone & GitHub Cloud Sync Modal [s] */}
+      <CloudSyncModal state={state} dispatch={dispatch} />
+
+      {/* Desktop 3-Column Split View + Responsive Mobile Single-Panel View */}
       <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">
-        <LeftPanelTree state={state} dispatch={dispatch} />
-        <CenterWorkspace
-          state={state}
-          dispatch={dispatch}
-          rows={rows}
-          regexError={regexError}
-        />
-        <RightInspectorPanel state={state} dispatch={dispatch} />
+        {/* Column 1: Left Project & Category Tree */}
+        <div
+          className={`${
+            state.focusedPanel === 'LEFT' ? 'flex w-full md:w-auto' : 'hidden md:flex'
+          } h-full min-h-0`}
+        >
+          <LeftPanelTree state={state} dispatch={dispatch} />
+        </div>
+
+        {/* Column 2: Center Schedule / CLI Stream Workspace */}
+        <div
+          className={`${
+            state.focusedPanel === 'CENTER' ? 'flex flex-1' : 'hidden md:flex md:flex-1'
+          } h-full min-h-0 min-w-0`}
+        >
+          <CenterWorkspace
+            state={state}
+            dispatch={dispatch}
+            rows={rows}
+            regexError={regexError}
+          />
+        </div>
+
+        {/* Column 3: Unified Task & Subtask Composer + Inspector */}
+        <div
+          className={`${
+            state.focusedPanel === 'RIGHT' ? 'flex w-full md:w-auto' : 'hidden md:flex'
+          } h-full min-h-0`}
+        >
+          <RightInspectorPanel state={state} dispatch={dispatch} />
+        </div>
       </div>
+
+      {/* Mobile / Phone Touch Navigation Bar (<768px) */}
+      <nav className="flex md:hidden h-10 bg-[#18181B] border-t border-zinc-800 text-xs shrink-0">
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'SET_PANEL_FOCUS', panel: 'LEFT' })}
+          className={`flex-1 flex items-center justify-center gap-1 border-r border-zinc-800 ${
+            state.focusedPanel === 'LEFT'
+              ? 'bg-[#E05C36] text-[#0F0F11] font-bold'
+              : 'text-zinc-400'
+          }`}
+        >
+          <span>[01] REPOS</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'SET_PANEL_FOCUS', panel: 'CENTER' })}
+          className={`flex-1 flex items-center justify-center gap-1 border-r border-zinc-800 ${
+            state.focusedPanel === 'CENTER'
+              ? 'bg-[#E05C36] text-[#0F0F11] font-bold'
+              : 'text-zinc-400'
+          }`}
+        >
+          <span>[02] WORKSPACE</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'SET_PANEL_FOCUS', panel: 'RIGHT' })}
+          className={`flex-1 flex items-center justify-center gap-1 ${
+            state.focusedPanel === 'RIGHT'
+              ? 'bg-[#E05C36] text-[#0F0F11] font-bold'
+              : 'text-zinc-400'
+          }`}
+        >
+          <span>[03] + ADD / EDIT</span>
+        </button>
+      </nav>
 
       {/* Bottom Vim Keybinding Status Bar */}
       <StatusBarKeyHints state={state} dispatch={dispatch} />

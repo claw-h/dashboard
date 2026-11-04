@@ -10,28 +10,28 @@ interface AgentProtocolModalProps {
 
 const CLI_SNIPPETS = [
   {
-    label: '1. Initialize a New Project in ~/Documents/Github on YXB // CMD',
-    cmd: `node ~/Documents/Github/dashboard/scripts/agent-sync.mjs init-project \\
+    label: '1. Local CWD-Scoped Commands (Run inside any ~/Documents/Github/<repo>)',
+    cmd: `cd ~/Documents/Github/portyxb
+yxb status                                  # Auto-detects PORTYXB & prints L0..L3 tree
+yxb add "Optimize WebGL2 shadow atlas" -p HIGH -m
+yxb sub task-port-200 "Hoist temporary Matrix4 allocation"
+yxb done task-port-201                      # Marks completed & updates portyxb/TASKS.md`,
+  },
+  {
+    label: '2. Global Multi-Repo Scan & Bidirectional Phone/Cloud Sync',
+    cmd: `yxb status -g                               # Print all 11 repositories & Git status
+yxb sync                                    # Scan Git branches & write TASKS.md to all 11 repos
+yxb pull                                    # Pull phone/remote edits from GitHub
+yxb push                                    # Commit & push registry to GitHub (claw-h/dashboard)`,
+  },
+  {
+    label: '3. Initialize & Register a Brand-New Repository on YXB // CMD',
+    cmd: `yxb init-project \\
   --code "NEBULA" \\
   --name "Nebula Shader Engine" \\
   --path "~/Documents/Github/nebula" \\
   --stack "Astro,Three.js,GLSL" \\
   --desc "Real-time volumetric shader studio"`,
-  },
-  {
-    label: '2. Add a Task or Nested Subtask (L0..L3) from any Agent Session',
-    cmd: `node ~/Documents/Github/dashboard/scripts/agent-sync.mjs add-task \\
-  --project "proj-portyxb" \\
-  --title "Implement offscreen WebGL2 render target pool" \\
-  --priority "HIGH" \\
-  --milestone`,
-  },
-  {
-    label: '3. Log an Agent Architectural Change or Completed Task',
-    cmd: `node ~/Documents/Github/dashboard/scripts/agent-sync.mjs log \\
-  --project "proj-aos" \\
-  --tool "AgentCommit" \\
-  --summary "Completed 6-Sector 3D character & shader upgrade"`,
   },
 ];
 
@@ -60,14 +60,13 @@ export const AgentProtocolModal: React.FC<AgentProtocolModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-3xl bg-[#0F0F11] border-2 border-[#E05C36] shadow-2xl flex flex-col max-h-[85dvh] font-mono text-xs select-none"
       >
-        {/* Header */}
         <div className="px-4 py-2.5 bg-[#18181B] border-b border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="px-1.5 py-0.5 bg-[#E05C36] text-[#0F0F11] font-bold">
-              [g] GLOBAL AGENT CONTEXT PROTOCOL
+              [g] GLOBAL &amp; LOCAL `yxb` AGENT CLI PROTOCOL
             </span>
-            <span className="text-[#F4F4F5] font-bold">
-              YXB // CMD Automatic Multi-Agent Telemetry
+            <span className="text-[#F4F4F5] font-bold hidden sm:inline">
+              Per-Repo TASKS.md + CWD Auto-Scoping
             </span>
           </div>
           <button
@@ -79,30 +78,29 @@ export const AgentProtocolModal: React.FC<AgentProtocolModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 overflow-y-auto tui-scroll space-y-4">
-          {/* Active Global Rules Status */}
           <div className="p-3 bg-[#18181B] border border-zinc-800 space-y-2">
             <div className="text-[#E05C36] font-bold">
-              ┌── ACTIVE HIERARCHICAL AGENT DISCOVERY HOOKS ──┐
+              ┌── ACTIVE AGENT DISCOVERY &amp; PER-REPO `TASKS.md` MIRRORS ──┐
             </div>
             <p className="text-zinc-300 leading-relaxed text-[11px]">
-              All future coding agents (Antigravity, Claude Code, Cursor, Codex) operating inside{' '}
-              <code className="text-[#E05C36]">~/Documents/Github/*</code> automatically inherit the
-              root rules below and synchronize new projects, tasks, and architectural changes to
-              this dashboard:
+              Every repository in <code className="text-[#E05C36]">~/Documents/Github/*</code> now
+              contains an auto-synced <code className="text-[#E05C36]">TASKS.md</code> blueprint at
+              its root, and the global <code className="text-[#E05C36]">yxb</code> binary (
+              <code className="text-zinc-400">~/.local/bin/yxb</code>) automatically detects which
+              repo you or an agent are inside via <code className="text-zinc-400">process.cwd()</code>.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
               <div className="p-2 bg-[#0F0F11] border border-zinc-800 flex items-center justify-between">
+                <span className="text-zinc-300">~/.local/bin/yxb (Global Binary)</span>
+                <span className="text-emerald-400 font-bold">● INSTALLED</span>
+              </div>
+              <div className="p-2 bg-[#0F0F11] border border-zinc-800 flex items-center justify-between">
+                <span className="text-zinc-300">~/Documents/Github/*/TASKS.md</span>
+                <span className="text-emerald-400 font-bold">● 11/11 SYNCED</span>
+              </div>
+              <div className="p-2 bg-[#0F0F11] border border-zinc-800 flex items-center justify-between">
                 <span className="text-zinc-300">~/Documents/Github/AGENTS.md</span>
-                <span className="text-emerald-400 font-bold">● ACTIVE</span>
-              </div>
-              <div className="p-2 bg-[#0F0F11] border border-zinc-800 flex items-center justify-between">
-                <span className="text-zinc-300">~/Documents/Github/GEMINI.md</span>
-                <span className="text-emerald-400 font-bold">● ACTIVE</span>
-              </div>
-              <div className="p-2 bg-[#0F0F11] border border-zinc-800 flex items-center justify-between">
-                <span className="text-zinc-300">~/Documents/Github/CLAUDE.md</span>
                 <span className="text-emerald-400 font-bold">● ACTIVE</span>
               </div>
               <div className="p-2 bg-[#0F0F11] border border-zinc-800 flex items-center justify-between">
@@ -112,10 +110,9 @@ export const AgentProtocolModal: React.FC<AgentProtocolModalProps> = ({
             </div>
           </div>
 
-          {/* CLI Commands for Future Agents */}
           <div className="space-y-2.5">
             <div className="text-[11px] font-bold text-[#F4F4F5] uppercase tracking-wider">
-              ├─ Headless Agent CLI Sync Commands (scripts/agent-sync.mjs)
+              ├─ Global &amp; Local Scoped `yxb` CLI Reference
             </div>
 
             {CLI_SNIPPETS.map((item, idx) => (
@@ -141,10 +138,9 @@ export const AgentProtocolModal: React.FC<AgentProtocolModalProps> = ({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-4 py-2.5 bg-[#18181B] border-t border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
           <span>Canonical Ledger: ~/Documents/Github/dashboard/src/data/workspaceRegistry.json</span>
-          <span className="text-[#E05C36] font-bold">YXB // CMD v2.5</span>
+          <span className="text-[#E05C36] font-bold">YXB // CMD v3.0</span>
         </div>
       </div>
     </div>

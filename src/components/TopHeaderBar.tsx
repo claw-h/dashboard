@@ -33,10 +33,9 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
   const activeProject = state.projects.find((p) => p.id === state.selectedProjectId);
 
   return (
-    <header className="h-11 bg-[#0F0F11] border-b border-zinc-800 px-3 flex items-center justify-between gap-2.5 text-xs select-none shrink-0">
+    <header className="h-11 bg-[#0F0F11] border-b border-zinc-800 px-3 flex items-center justify-between gap-2 text-xs select-none shrink-0">
       {/* Left: Bespoke YXB // CMD Emblem & Interactive ~/workspace Breadcrumb Dropdown Trigger */}
       <div className="flex items-center gap-2 min-w-0">
-        {/* Custom YXB // CMD Geometric Brand Badge */}
         <div className="flex items-center gap-2 px-2.5 py-1 bg-[#18181B] border border-zinc-800 shrink-0">
           <svg
             width="15"
@@ -57,12 +56,12 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
           <span className="font-bold tracking-wider text-[#F4F4F5]">
             YXB <span className="text-[#E05C36]">//</span> CMD
           </span>
-          <span className="text-[10px] px-1 bg-zinc-900 border border-zinc-700 text-zinc-400">
-            v2.5
+          <span className="hidden sm:inline text-[10px] px-1 bg-zinc-900 border border-zinc-700 text-zinc-400">
+            v3.0
           </span>
         </div>
 
-        <span className="text-zinc-700">│</span>
+        <span className="text-zinc-700 hidden sm:inline">│</span>
 
         {/* Interactive ~/workspace Breadcrumb -> Opens Browse Project Mega-Menu [p] */}
         <button
@@ -76,18 +75,10 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
           title="Press [p] or click to browse all ~/Documents/Github repositories"
         >
           <span className="text-[#E05C36] font-bold">[p]</span>
-          <span className="text-zinc-500 hidden sm:inline">~/workspace/</span>
+          <span className="text-zinc-500 hidden lg:inline">~/workspace/</span>
           <span className="text-[#F4F4F5] font-bold">
             {activeProject?.code ?? 'ROOT'}
           </span>
-          {state.selectedCategoryId !== 'ALL' && (
-            <>
-              <span className="text-zinc-600">/</span>
-              <span className="text-[#E05C36] truncate max-w-[100px]">
-                {state.categories.find((c) => c.id === state.selectedCategoryId)?.slug}
-              </span>
-            </>
-          )}
           <span className="ml-1 px-1.5 py-0.2 bg-[#0F0F11] border border-zinc-700 group-hover:border-[#E05C36] text-[10px] text-[#E05C36] font-semibold">
             Browse ({state.projects.length}) ▾
           </span>
@@ -95,8 +86,7 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
       </div>
 
       {/* Center: Filter Bar (i) & Regex Search (/) */}
-      <div className="hidden md:flex items-center gap-2 flex-1 max-w-lg">
-        {/* Filter Input [i] */}
+      <div className="hidden lg:flex items-center gap-2 flex-1 max-w-md">
         <div
           className={`flex items-center flex-1 bg-[#18181B] border px-2 py-1 transition-colors ${
             state.inputMode === 'FILTER_BAR'
@@ -120,20 +110,8 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
             placeholder="filter tasks..."
             className="bg-transparent outline-none w-full text-[#F4F4F5] placeholder-zinc-600 text-xs font-mono"
           />
-          {state.filterQuery && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                dispatch({ type: 'SET_FILTER_QUERY', query: '' });
-              }}
-              className="text-zinc-500 hover:text-[#E05C36] ml-1"
-            >
-              ×
-            </button>
-          )}
         </div>
 
-        {/* Global Regex Input [/] */}
         <div
           className={`flex items-center flex-1 bg-[#18181B] border px-2 py-1 transition-colors ${
             regexError
@@ -161,64 +139,67 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
             className="bg-transparent outline-none w-full text-[#F4F4F5] placeholder-zinc-600 text-xs font-mono px-0.5"
           />
           <span className="text-zinc-500">/i</span>
-          {state.regexQuery && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                dispatch({ type: 'SET_REGEX_QUERY', query: '' });
-              }}
-              className="text-zinc-500 hover:text-[#E05C36] ml-1"
-            >
-              ×
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Right: Agent Context Protocol [g], Mode Switcher [t/c] & Telemetry */}
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Right: Phone/Cloud Sync [s], Agent Protocol [g], Mode Switcher [t/c] */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'TOGGLE_CLOUD_SYNC' })}
+          className={`px-2 py-1 text-xs font-mono border transition-colors flex items-center gap-1 ${
+            state.cloudSyncOpen
+              ? 'bg-[#E05C36] text-[#0F0F11] border-[#E05C36] font-bold'
+              : 'bg-[#18181B] border-zinc-800 text-zinc-300 hover:border-[#E05C36]'
+          }`}
+          title="Phone & GitHub Bidirectional Sync [s]"
+        >
+          <span className="text-[#E05C36] font-bold">[s]</span>
+          <span className="hidden sm:inline">☁ SYNC</span>
+        </button>
+
         <button
           type="button"
           onClick={() => dispatch({ type: 'TOGGLE_AGENT_PROTOCOL' })}
-          className={`px-2.5 py-1 text-xs font-mono border transition-colors flex items-center gap-1.5 ${
+          className={`px-2 py-1 text-xs font-mono border transition-colors flex items-center gap-1 ${
             state.agentProtocolOpen
               ? 'bg-[#E05C36] text-[#0F0F11] border-[#E05C36] font-bold'
-              : 'bg-[#18181B] border-zinc-800 text-zinc-300 hover:border-[#E05C36] hover:text-[#F4F4F5]'
+              : 'bg-[#18181B] border-zinc-800 text-zinc-300 hover:border-[#E05C36]'
           }`}
-          title="View Global Agent Context & CLI Sync Protocol [g]"
+          title="Global & Local `yxb` Agent CLI Protocol [g]"
         >
           <span className="text-[#E05C36] font-bold">[g]</span>
-          <span className="hidden lg:inline">AGENT PROTOCOL</span>
+          <span className="hidden xl:inline">AGENT CLI</span>
         </button>
 
         <div className="flex items-center border border-zinc-800 bg-[#18181B]">
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_WORKSPACE_MODE', mode: 'SCHEDULE', keyHint: 't' })}
-            className={`px-2.5 py-1 text-xs font-mono transition-colors flex items-center gap-1 ${
+            className={`px-2 py-1 text-xs font-mono transition-colors flex items-center gap-1 ${
               state.activeMode === 'SCHEDULE'
                 ? 'bg-[#E05C36] text-[#0F0F11] font-bold'
                 : 'text-zinc-400 hover:text-[#F4F4F5]'
             }`}
           >
             <span>[t]</span>
-            <span>SCHEDULE</span>
+            <span className="hidden sm:inline">SCHEDULE</span>
           </button>
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_WORKSPACE_MODE', mode: 'CLI_STREAM', keyHint: 'c' })}
-            className={`px-2.5 py-1 text-xs font-mono transition-colors flex items-center gap-1 border-l border-zinc-800 ${
+            className={`px-2 py-1 text-xs font-mono transition-colors flex items-center gap-1 border-l border-zinc-800 ${
               state.activeMode === 'CLI_STREAM'
                 ? 'bg-[#E05C36] text-[#0F0F11] font-bold'
                 : 'text-zinc-400 hover:text-[#F4F4F5]'
             }`}
           >
             <span>[c]</span>
-            <span>CLI STREAM</span>
+            <span className="hidden sm:inline">CLI</span>
           </button>
         </div>
 
-        <div className="hidden xl:flex items-center gap-2 px-2 py-1 bg-[#18181B] border border-zinc-800 text-zinc-400">
+        <div className="hidden 2xl:flex items-center gap-2 px-2 py-1 bg-[#18181B] border border-zinc-800 text-zinc-400">
           <span>
             DONE <strong className="text-[#F4F4F5]">{completedCount}/{allTasks.length}</strong>
           </span>

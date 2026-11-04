@@ -1,17 +1,26 @@
 {
-  "schemaVersion": 2,
-  "updatedAt": "2026-11-04T23:26:00Z",
+  "schemaVersion": 3,
+  "updatedAt": "2026-11-04T18:43:23.448Z",
   "projects": [
     {
       "id": "proj-dashboard",
       "code": "YXB-CMD",
       "name": "YXB // CMD Agentic Console",
-      "description": "Sovereign TUI command center, hierarchical task scheduler & multi-agent telemetry ledger",
+      "description": "Sovereign TUI command center, hierarchical task scheduler, global/local CLI & GitHub phone sync engine",
       "localPath": "~/Documents/Github/dashboard",
       "repoUrl": "https://github.com/claw-h/dashboard",
-      "stack": ["Astro 4", "React 18", "Tailwind CSS", "TypeScript"],
+      "stack": [
+        "Astro 4",
+        "React 18",
+        "Tailwind CSS",
+        "TypeScript",
+        "Node CLI"
+      ],
       "lifecycle": "PRODUCTION",
-      "lastAgentSync": "2026-11-04 23:26",
+      "lastAgentSync": "2026-11-04 23:52",
+      "gitBranch": "main",
+      "gitDirtyCount": 16,
+      "lastCommit": "feat: rebrand to YXB // CMD, add Browse Project (11 repos) dropdown & global agent sync protocol",
       "order": 0,
       "expanded": true
     },
@@ -22,9 +31,18 @@
       "description": "SSR creative engineering portfolio with HeartScene volumetric slicing, DreamCanvas triptych & 3D Dossier",
       "localPath": "~/Documents/Github/portyxb",
       "repoUrl": "https://github.com/claw-h/portyxb",
-      "stack": ["Astro SSR", "Three.js", "WebGL Shaders", "Web Workers", "Web Audio"],
+      "stack": [
+        "Astro SSR",
+        "Three.js",
+        "WebGL Shaders",
+        "Web Workers",
+        "Web Audio"
+      ],
       "lifecycle": "PRODUCTION",
-      "lastAgentSync": "2026-11-04 23:25",
+      "lastAgentSync": "2026-11-04 23:50",
+      "gitBranch": "main",
+      "gitDirtyCount": 1,
+      "lastCommit": "favicon update and bugfixes",
       "order": 1,
       "expanded": true
     },
@@ -35,9 +53,18 @@
       "description": "Satirical brutalist-corporate 3D physics & ragdoll compactor simulation across 6 sectors and 18 stages",
       "localPath": "~/Documents/Github/AOS",
       "repoUrl": "https://github.com/claw-h/AOS",
-      "stack": ["Astro 5", "Three.js", "Matter.js", "React", "GLSL"],
+      "stack": [
+        "Astro 5",
+        "Three.js",
+        "Matter.js",
+        "React",
+        "GLSL"
+      ],
       "lifecycle": "ACTIVE",
       "lastAgentSync": "2026-11-04 23:02",
+      "gitBranch": "main",
+      "gitDirtyCount": 2,
+      "lastCommit": "feat(3d): upgrade CharacterBuilder3D & EnvironmentBuilder3D across 18 stages",
       "order": 2,
       "expanded": false
     },
@@ -48,9 +75,17 @@
       "description": "Five-layer spatial WebGL & 3D-interpolated ASCII object stage for independent design & shader foundry",
       "localPath": "~/Documents/Github/Contrast",
       "repoUrl": "https://github.com/claw-h/Contrast",
-      "stack": ["Astro", "Three.js", "GSAP", "ASCII Post-FX"],
+      "stack": [
+        "Astro",
+        "Three.js",
+        "GSAP",
+        "ASCII Post-FX"
+      ],
       "lifecycle": "PRODUCTION",
       "lastAgentSync": "2026-10-31 15:23",
+      "gitBranch": "main",
+      "gitDirtyCount": 14,
+      "lastCommit": "fix: morph receding logo copies directly into distant horizon line and add ancient palimpsest ink-dissolve distortion to background diagrams",
       "order": 3,
       "expanded": false
     },
@@ -61,9 +96,17 @@
       "description": "1,000-constellation generative celestial cartography observatory, Planckian starlight & academic workspace",
       "localPath": "~/Documents/Github/DRC",
       "repoUrl": "https://github.com/claw-h/DRC",
-      "stack": ["Astro 5", "Canvas 2D", "Turso LibSQL", "CSS Scroll-Driven"],
+      "stack": [
+        "Astro 5",
+        "Canvas 2D",
+        "Turso LibSQL",
+        "CSS Scroll-Driven"
+      ],
       "lifecycle": "PRODUCTION",
       "lastAgentSync": "2026-10-21 18:43",
+      "gitBranch": "main",
+      "gitDirtyCount": 2,
+      "lastCommit": "mobile spacing bug fixed",
       "order": 4,
       "expanded": false
     },
@@ -74,9 +117,18 @@
       "description": "High-speed stateful Zsh directory navigator driven by fzf & fd with git-status bubbling",
       "localPath": "~/Documents/Github/fuzzy-nav",
       "repoUrl": "https://github.com/claw-h/fuzzy-nav",
-      "stack": ["Zsh", "fzf", "fd", "bat", "Git CLI"],
+      "stack": [
+        "Zsh",
+        "fzf",
+        "fd",
+        "bat",
+        "Git CLI"
+      ],
       "lifecycle": "PRODUCTION",
       "lastAgentSync": "2026-07-18 20:53",
+      "gitBranch": "main",
+      "gitDirtyCount": 1,
+      "lastCommit": "modified:   fuzzy-nav.plugin.zsh",
       "order": 5,
       "expanded": false
     },
@@ -87,9 +139,17 @@
       "description": "Full-stack school management ERP with student registry, fee ledgers, exam grading & document verification",
       "localPath": "~/Documents/Github/schoolos",
       "repoUrl": "https://github.com/claw-h/schoolos",
-      "stack": ["Next.js 14", "Supabase", "TypeScript", "Tailwind CSS"],
+      "stack": [
+        "Next.js 14",
+        "Supabase",
+        "TypeScript",
+        "Tailwind CSS"
+      ],
       "lifecycle": "PRODUCTION",
       "lastAgentSync": "2026-04-25 14:10",
+      "gitBranch": "main",
+      "gitDirtyCount": 1,
+      "lastCommit": "modified:   app/(app)/layout.tsx modified:   components/modules/Dashboard.tsx new file:   components/ui/Clock.tsx new file:   components/ui/WeatherWidget.tsx new file:   lib/academic-year.ts",
       "order": 6,
       "expanded": false
     },
@@ -99,9 +159,19 @@
       "name": "Atlas of the Bizarre",
       "description": "Autonomous Gemini 2.5 anomaly hunter, ChromaDB semantic vector memory & UMAP 2D graph visualizer",
       "localPath": "~/Documents/Github/atlas-of-the-bizarre",
-      "stack": ["Python", "Gemini 2.5 Flash", "LangChain", "ChromaDB", "UMAP", "Plotly"],
+      "stack": [
+        "Python",
+        "Gemini 2.5 Flash",
+        "LangChain",
+        "ChromaDB",
+        "UMAP",
+        "Plotly"
+      ],
       "lifecycle": "ACTIVE",
       "lastAgentSync": "2026-07-10 02:03",
+      "gitBranch": "main",
+      "gitDirtyCount": 0,
+      "lastCommit": "feat(viz): compress 3072D embeddings to 2D UMAP Plotly scatter",
       "order": 7,
       "expanded": false
     },
@@ -111,9 +181,17 @@
       "name": "loveOS — Cyber-Romantic Comms",
       "description": "Sci-fi spaceship command center portal with Constellation memories, Core Mood Vitals & Supernova switch",
       "localPath": "~/Documents/Github/Lovesite/love-os",
-      "stack": ["Next.js", "NextAuth", "TypeScript", "Spring Physics"],
+      "stack": [
+        "Next.js",
+        "NextAuth",
+        "TypeScript",
+        "Spring Physics"
+      ],
       "lifecycle": "ACTIVE",
       "lastAgentSync": "2026-07-12 12:52",
+      "gitBranch": "main",
+      "gitDirtyCount": 1,
+      "lastCommit": "modified:   app/api/auth/[...nextauth]/route.ts",
       "order": 8,
       "expanded": false
     },
@@ -123,9 +201,17 @@
       "name": "Interstellar Iron Marketplace",
       "description": "Single-artist e-commerce engine with Astro SSR, Prisma PostgreSQL ORM, and HttpOnly Email OTP sessions",
       "localPath": "~/Documents/Github/mahis-DB/interstellar-iron",
-      "stack": ["Astro SSR", "Prisma ORM", "PostgreSQL", "TypeScript"],
+      "stack": [
+        "Astro SSR",
+        "Prisma ORM",
+        "PostgreSQL",
+        "TypeScript"
+      ],
       "lifecycle": "ACTIVE",
       "lastAgentSync": "2026-07-10 22:49",
+      "gitBranch": "main",
+      "gitDirtyCount": 5,
+      "lastCommit": "Ignore all markdown except README.md",
       "order": 9,
       "expanded": false
     },
@@ -135,114 +221,262 @@
       "name": "RheoX Systems Lab",
       "description": "Incubating R&D workspace repository staged for next-generation agentic systems architecture",
       "localPath": "~/Documents/Github/RheoX",
-      "stack": ["R&D", "Greenfield", "Architecture"],
+      "stack": [
+        "R&D",
+        "Greenfield",
+        "Architecture"
+      ],
       "lifecycle": "INCUBATING",
       "lastAgentSync": "2026-11-02 11:51",
+      "gitBranch": "main",
+      "gitDirtyCount": 0,
+      "lastCommit": "chore: initialize RheoX workspace directory",
       "order": 10,
       "expanded": false
     }
   ],
   "categories": [
-    { "id": "cat-cmd-core", "projectId": "proj-dashboard", "name": "TUI Core & Keymaps", "slug": "tui-core", "order": 0 },
-    { "id": "cat-cmd-sync", "projectId": "proj-dashboard", "name": "Agent Sync Protocol", "slug": "agent-sync", "order": 1 },
-    { "id": "cat-cmd-browser", "projectId": "proj-dashboard", "name": "Workspace Browser", "slug": "workspace-browser", "order": 2 },
-
-    { "id": "cat-port-webgl", "projectId": "proj-portyxb", "name": "WebGL Scenes & Shaders", "slug": "webgl-scenes", "order": 0 },
-    { "id": "cat-port-workers", "projectId": "proj-portyxb", "name": "Workers & Readiness Gate", "slug": "workers-gate", "order": 1 },
-
-    { "id": "cat-aos-3d", "projectId": "proj-aos", "name": "3D Characters & Shaders", "slug": "3d-characters", "order": 0 },
-    { "id": "cat-aos-physics", "projectId": "proj-aos", "name": "Compactor & Exploded View", "slug": "compactor-physics", "order": 1 },
-
-    { "id": "cat-cntrst-stage", "projectId": "proj-contrast", "name": "5-Layer Spatial Stage", "slug": "spatial-stage", "order": 0 },
-    { "id": "cat-cntrst-ascii", "projectId": "proj-contrast", "name": "ASCII Shader Pipeline", "slug": "ascii-shader", "order": 1 },
-
-    { "id": "cat-drc-sky", "projectId": "proj-drc", "name": "Celestial Cartography", "slug": "celestial-sky", "order": 0 },
-    { "id": "cat-drc-reader", "projectId": "proj-drc", "name": "Bipartite Reader & Turso", "slug": "bipartite-reader", "order": 1 },
-
-    { "id": "cat-fzf-core", "projectId": "proj-fuzzynav", "name": "Zsh & Git Bubbling", "slug": "zsh-core", "order": 0 },
-
-    { "id": "cat-school-erp", "projectId": "proj-schoolos", "name": "Students, Fees & Exams", "slug": "erp-modules", "order": 0 },
-
-    { "id": "cat-atlas-hunter", "projectId": "proj-atlas", "name": "Anomaly Hunter & ChromaDB", "slug": "anomaly-hunter", "order": 0 },
-
-    { "id": "cat-love-portal", "projectId": "proj-lovesite", "name": "Constellations & Vitals", "slug": "love-vitals", "order": 0 },
-
-    { "id": "cat-mahis- commerce", "projectId": "proj-mahisdb", "name": "Prisma & OTP Auth", "slug": "prisma-auth", "order": 0 },
-
-    { "id": "cat-rheox-init", "projectId": "proj-rheox", "name": "Bootstrap & Spec", "slug": "bootstrap-spec", "order": 0 }
+    {
+      "id": "cat-cmd-core",
+      "projectId": "proj-dashboard",
+      "name": "TUI Core & Panel 3 Composer",
+      "slug": "tui-core",
+      "order": 0
+    },
+    {
+      "id": "cat-cmd-sync",
+      "projectId": "proj-dashboard",
+      "name": "Global CLI & Phone Cloud Sync",
+      "slug": "agent-sync",
+      "order": 1
+    },
+    {
+      "id": "cat-cmd-browser",
+      "projectId": "proj-dashboard",
+      "name": "Workspace Repo Browser",
+      "slug": "workspace-browser",
+      "order": 2
+    },
+    {
+      "id": "cat-port-webgl",
+      "projectId": "proj-portyxb",
+      "name": "WebGL Scenes & Shaders",
+      "slug": "webgl-scenes",
+      "order": 0
+    },
+    {
+      "id": "cat-port-workers",
+      "projectId": "proj-portyxb",
+      "name": "Workers & Readiness Gate",
+      "slug": "workers-gate",
+      "order": 1
+    },
+    {
+      "id": "cat-port-telemetry",
+      "projectId": "proj-portyxb",
+      "name": "Reticle, Audio & CWV",
+      "slug": "reticle-audio",
+      "order": 2
+    },
+    {
+      "id": "cat-aos-3d",
+      "projectId": "proj-aos",
+      "name": "3D Characters & GLSL Shaders",
+      "slug": "3d-characters",
+      "order": 0
+    },
+    {
+      "id": "cat-aos-physics",
+      "projectId": "proj-aos",
+      "name": "Compactor & Exploded View",
+      "slug": "compactor-physics",
+      "order": 1
+    },
+    {
+      "id": "cat-aos-cctv",
+      "projectId": "proj-aos",
+      "name": "CCTV Export & Overseer Rig",
+      "slug": "cctv-overseer",
+      "order": 2
+    },
+    {
+      "id": "cat-cntrst-stage",
+      "projectId": "proj-contrast",
+      "name": "5-Layer Spatial Stage",
+      "slug": "spatial-stage",
+      "order": 0
+    },
+    {
+      "id": "cat-cntrst-ascii",
+      "projectId": "proj-contrast",
+      "name": "ASCII Shader Pipeline",
+      "slug": "ascii-shader",
+      "order": 1
+    },
+    {
+      "id": "cat-drc-sky",
+      "projectId": "proj-drc",
+      "name": "Celestial Cartography Engine",
+      "slug": "celestial-sky",
+      "order": 0
+    },
+    {
+      "id": "cat-drc-reader",
+      "projectId": "proj-drc",
+      "name": "Bipartite Reader & Turso DB",
+      "slug": "bipartite-reader",
+      "order": 1
+    },
+    {
+      "id": "cat-fzf-core",
+      "projectId": "proj-fuzzynav",
+      "name": "Zsh Core & Git Bubbling",
+      "slug": "zsh-core",
+      "order": 0
+    },
+    {
+      "id": "cat-fzf-preview",
+      "projectId": "proj-fuzzynav",
+      "name": "Media & Bat Previews",
+      "slug": "media-preview",
+      "order": 1
+    },
+    {
+      "id": "cat-school-erp",
+      "projectId": "proj-schoolos",
+      "name": "Students, Admissions & Docs",
+      "slug": "students-docs",
+      "order": 0
+    },
+    {
+      "id": "cat-school-finance",
+      "projectId": "proj-schoolos",
+      "name": "Fee Ledger & Academics",
+      "slug": "fees-academics",
+      "order": 1
+    },
+    {
+      "id": "cat-atlas-hunter",
+      "projectId": "proj-atlas",
+      "name": "Gemini 2.5 Hunter Agents",
+      "slug": "anomaly-hunter",
+      "order": 0
+    },
+    {
+      "id": "cat-atlas-umap",
+      "projectId": "proj-atlas",
+      "name": "ChromaDB & UMAP Visualizer",
+      "slug": "chromadb-umap",
+      "order": 1
+    },
+    {
+      "id": "cat-love-portal",
+      "projectId": "proj-lovesite",
+      "name": "Constellations & Mood Vitals",
+      "slug": "love-vitals",
+      "order": 0
+    },
+    {
+      "id": "cat-love-comms",
+      "projectId": "proj-lovesite",
+      "name": "Supernova Switch & Auth",
+      "slug": "supernova-auth",
+      "order": 1
+    },
+    {
+      "id": "cat-mahis-commerce",
+      "projectId": "proj-mahisdb",
+      "name": "Prisma & OTP Auth",
+      "slug": "prisma-auth",
+      "order": 0
+    },
+    {
+      "id": "cat-mahis-store",
+      "projectId": "proj-mahisdb",
+      "name": "Catalog & Checkout SSR",
+      "slug": "catalog-checkout",
+      "order": 1
+    },
+    {
+      "id": "cat-rheox-init",
+      "projectId": "proj-rheox",
+      "name": "Bootstrap & Spec",
+      "slug": "bootstrap-spec",
+      "order": 0
+    }
   ],
   "tasks": [
     {
       "id": "task-cmd-100",
       "projectId": "proj-dashboard",
-      "categoryId": "cat-cmd-browser",
+      "categoryId": "cat-cmd-core",
       "parentId": null,
       "depth": 0,
-      "title": "Mount Browse Project [p] Mega-Dropdown on ~/Documents/Github breadcrumb",
-      "notes": "Catalog all 11 repositories in ~/Documents/Github with stack tags, completion bars, and instant project switching.",
+      "title": "Consolidate all Task & Subtask (L0..L3) creation and editing inside Panel 3",
+      "notes": "Replace Panel 2 inline banner with unified Panel 3 Task & Subtask Composer + per-node [+] spawn buttons.",
       "priority": "HIGH",
       "status": "COMPLETED",
-      "dueDate": "2026-11-04",
+      "dueDate": "2026-11-05",
       "isMilestone": true,
       "estimatedMinutes": 45,
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-11-04T23:00:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
     {
       "id": "task-cmd-101",
       "projectId": "proj-dashboard",
-      "categoryId": "cat-cmd-browser",
+      "categoryId": "cat-cmd-core",
       "parentId": "task-cmd-100",
       "depth": 1,
-      "title": "Index all 11 local repositories in src/data/workspaceRegistry.json",
-      "notes": "Include portyxb, AOS, Contrast, DRC, fuzzy-nav, schoolos, atlas-of-the-bizarre, Lovesite, mahis-DB, RheoX, and dashboard.",
+      "title": "Build Always-Ready Quick Composer at top of RightInspectorPanel.tsx",
+      "notes": "Support 1-click toggle between [+ Subtask under selected (L1..L3)] and [+ Root Task (L0) in Category].",
       "priority": "HIGH",
       "status": "COMPLETED",
-      "dueDate": "2026-11-04",
+      "dueDate": "2026-11-05",
       "isMilestone": false,
       "estimatedMinutes": 25,
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-11-04T23:05:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
     {
       "id": "task-cmd-102",
       "projectId": "proj-dashboard",
-      "categoryId": "cat-cmd-browser",
+      "categoryId": "cat-cmd-core",
       "parentId": "task-cmd-101",
       "depth": 2,
-      "title": "Add fuzzy search & quick project registration inside dropdown",
-      "notes": "Allow filtering by repo name, path, or stack tag plus inline new project initialization.",
-      "priority": "MEDIUM",
+      "title": "Add inline [+] child-spawn, [✓] status toggle, and [×] delete on every subtask row",
+      "notes": "Clicking [+] on an L1 subtask targets L2 immediately; clicking [+] on L2 targets L3.",
+      "priority": "HIGH",
       "status": "COMPLETED",
-      "dueDate": "2026-11-04",
+      "dueDate": "2026-11-05",
       "isMilestone": false,
       "estimatedMinutes": 20,
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-11-04T23:10:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
     {
       "id": "task-cmd-103",
       "projectId": "proj-dashboard",
-      "categoryId": "cat-cmd-browser",
+      "categoryId": "cat-cmd-core",
       "parentId": "task-cmd-102",
       "depth": 3,
-      "title": "Bind [p] global shortcut and breadcrumb click toggle with Esc dismissal",
-      "notes": "Ensure zero collision with NORMAL mode Vim navigation.",
+      "title": "Add responsive Mobile 3-Tab Switcher ([01 REPOS] [02 WORKSPACE] [03 COMPOSER])",
+      "notes": "Ensure zero horizontal overflow on 390px phone screens when editing tasks remotely.",
       "priority": "HIGH",
       "status": "COMPLETED",
-      "dueDate": "2026-11-04",
+      "dueDate": "2026-11-05",
       "isMilestone": true,
-      "estimatedMinutes": 15,
+      "estimatedMinutes": 20,
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-11-04T23:12:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
     {
       "id": "task-cmd-200",
@@ -250,17 +484,17 @@
       "categoryId": "cat-cmd-sync",
       "parentId": null,
       "depth": 0,
-      "title": "Establish Permanent Multi-Agent Context & Auto-Sync Protocol",
-      "notes": "Configure ~/Documents/Github/AGENTS.md, GEMINI.md, CLAUDE.md, and scripts/agent-sync.mjs for all future agents.",
+      "title": "Ship Global & Local CWD-Scoped `yxb` CLI + GitHub Phone Cloud Bridge",
+      "notes": "Install ~/.local/bin/yxb, auto-detect current repo from process.cwd(), and sync TASKS.md across all 11 repos.",
       "priority": "HIGH",
-      "status": "IN_PROGRESS",
+      "status": "COMPLETED",
       "dueDate": "2026-11-05",
       "isMilestone": true,
       "estimatedMinutes": 60,
       "manualOrder": 1,
       "expanded": true,
       "createdAt": "2026-11-04T23:15:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
     {
       "id": "task-cmd-201",
@@ -268,17 +502,17 @@
       "categoryId": "cat-cmd-sync",
       "parentId": "task-cmd-200",
       "depth": 1,
-      "title": "Build scripts/agent-sync.mjs CLI for headless agent mutations",
-      "notes": "Support init-project, add-task, complete-task, and log commands from any terminal directory.",
+      "title": "Implement GitHub Contents API pull/push in src/state/githubSync.ts",
+      "notes": "Allow phone browsers to commit workspaceRegistry.json updates directly to claw-h/dashboard@main.",
       "priority": "HIGH",
       "status": "COMPLETED",
-      "dueDate": "2026-11-04",
+      "dueDate": "2026-11-05",
       "isMilestone": false,
       "estimatedMinutes": 30,
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-11-04T23:18:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
     {
       "id": "task-cmd-202",
@@ -286,27 +520,26 @@
       "categoryId": "cat-cmd-sync",
       "parentId": "task-cmd-200",
       "depth": 1,
-      "title": "Rebrand console identity to [◈] YXB // CMD with custom isometric emblem",
-      "notes": "Replace generic header badge, CLI prompt (yxb >), and SVG icon with YXB // CMD signature.",
+      "title": "Auto-generate per-repository TASKS.md blueprints across ~/Documents/Github/*",
+      "notes": "Write structured L0..L3 markdown trees into each repository root on `yxb sync`.",
       "priority": "HIGH",
       "status": "COMPLETED",
-      "dueDate": "2026-11-04",
+      "dueDate": "2026-11-05",
       "isMilestone": true,
-      "estimatedMinutes": 20,
+      "estimatedMinutes": 25,
       "manualOrder": 1,
       "expanded": true,
       "createdAt": "2026-11-04T23:20:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     },
-
     {
       "id": "task-port-100",
       "projectId": "proj-portyxb",
       "categoryId": "cat-port-webgl",
       "parentId": null,
       "depth": 0,
-      "title": "Enforce WebGL VRAM disposal & LoopController rAF suspension across 3 scenes",
-      "notes": "HeartScene, DreamCanvas, and DossierScene must dispose geometries/materials on destroy and pause offscreen.",
+      "title": "HeartScene Volumetric Mesh Slicing & Offscreen Worker Pipeline (src/scenes/HeartScene.ts)",
+      "notes": "Maintain strict VRAM disposal (.dispose()) and offscreen Web Worker geometry slicing for humanheart.glb.",
       "priority": "HIGH",
       "status": "COMPLETED",
       "dueDate": "2026-11-01",
@@ -323,8 +556,8 @@
       "categoryId": "cat-port-workers",
       "parentId": "task-port-100",
       "depth": 1,
-      "title": "Offload humanheart.glb volumetric mesh slicing to heartWorker.ts via Transferables",
-      "notes": "Zero main-thread blocking during 4-slot readiness gate boot sequence.",
+      "title": "Offload mesh plane-slicing math to src/scenes/heartWorker.ts",
+      "notes": "Prevent main-thread blocking during the 5-stage CRT preloader boot protocol.",
       "priority": "HIGH",
       "status": "COMPLETED",
       "dueDate": "2026-11-01",
@@ -336,24 +569,95 @@
       "updatedAt": "2026-11-01T18:00:00Z"
     },
     {
+      "id": "task-port-102",
+      "projectId": "proj-portyxb",
+      "categoryId": "cat-port-workers",
+      "parentId": "task-port-101",
+      "depth": 2,
+      "title": "Transfer Float32Array vertex/normal buffers via zero-copy Transferable Objects",
+      "notes": "Bind transferred buffers directly to THREE.BufferAttribute on worker message receipt.",
+      "priority": "HIGH",
+      "status": "COMPLETED",
+      "dueDate": "2026-11-01",
+      "isMilestone": false,
+      "estimatedMinutes": 35,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-10-21T10:00:00Z",
+      "updatedAt": "2026-11-01T18:00:00Z"
+    },
+    {
+      "id": "task-port-103",
+      "projectId": "proj-portyxb",
+      "categoryId": "cat-port-workers",
+      "parentId": "task-port-102",
+      "depth": 3,
+      "title": "Resolve markReady('heart') slot in src/utils/loadState.ts readiness gate",
+      "notes": "Synchronize with 'fonts', 'dream', and 'minSplash' slots before collapsing CRT overlay.",
+      "priority": "MEDIUM",
+      "status": "COMPLETED",
+      "dueDate": "2026-11-01",
+      "isMilestone": true,
+      "estimatedMinutes": 20,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-10-21T14:00:00Z",
+      "updatedAt": "2026-11-01T18:00:00Z"
+    },
+    {
       "id": "task-port-200",
       "projectId": "proj-portyxb",
       "categoryId": "cat-port-webgl",
       "parentId": null,
       "depth": 0,
-      "title": "Optimize DossierScene procedural book textures & Lighthouse CWV score",
-      "notes": "Maintain 60fps scroll broadcast bridge under Lenis smooth scroll.",
-      "priority": "MEDIUM",
+      "title": "DreamCanvas Staircase Triptych & NonEuclideanMaterial Lens Shader",
+      "notes": "Drive staircase-meshopt.glb & offscreen glyph engine via Lenis scroll velocity bridge.",
+      "priority": "HIGH",
       "status": "IN_PROGRESS",
-      "dueDate": "2026-11-09",
-      "isMilestone": false,
-      "estimatedMinutes": 75,
+      "dueDate": "2026-11-08",
+      "isMilestone": true,
+      "estimatedMinutes": 95,
       "manualOrder": 1,
       "expanded": true,
       "createdAt": "2026-11-02T10:00:00Z",
       "updatedAt": "2026-11-04T20:00:00Z"
     },
-
+    {
+      "id": "task-port-201",
+      "projectId": "proj-portyxb",
+      "categoryId": "cat-port-webgl",
+      "parentId": "task-port-200",
+      "depth": 1,
+      "title": "Audit zero object allocation inside rAF loop (hoist Vector3/Matrix4 temps)",
+      "notes": "Use .copy() and .lerp() exclusively inside DreamCanvas render tick.",
+      "priority": "HIGH",
+      "status": "IN_PROGRESS",
+      "dueDate": "2026-11-07",
+      "isMilestone": false,
+      "estimatedMinutes": 45,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-11-02T12:00:00Z",
+      "updatedAt": "2026-11-04T20:00:00Z"
+    },
+    {
+      "id": "task-port-300",
+      "projectId": "proj-portyxb",
+      "categoryId": "cat-port-telemetry",
+      "parentId": null,
+      "depth": 0,
+      "title": "Decouple CursorController.ts Reticle & TelevisionScene Procedural Dossier",
+      "notes": "Route all 3D raycast hits through src/utils/hoverTargets.ts event bus.",
+      "priority": "MEDIUM",
+      "status": "QUEUED",
+      "dueDate": "2026-11-10",
+      "isMilestone": false,
+      "estimatedMinutes": 60,
+      "manualOrder": 2,
+      "expanded": true,
+      "createdAt": "2026-11-03T10:00:00Z",
+      "updatedAt": "2026-11-04T20:00:00Z"
+    },
     {
       "id": "task-aos-100",
       "projectId": "proj-aos",
@@ -378,8 +682,8 @@
       "categoryId": "cat-aos-3d",
       "parentId": "task-aos-100",
       "depth": 1,
-      "title": "Wire SelectiveGTAO contact shadows, wind-sway foliage & cryo-frost shaders",
-      "notes": "Exclude sky/cloud/particle layers via userData.noAO = true.",
+      "title": "Build 18 Sector × Stage occupational character archetypes in CharacterBuilder3D.ts",
+      "notes": "Include Foundry welding visors, Severance bowler hats, Bio-Dome UV visors, Cryo-Architects, and EVA astronauts.",
       "priority": "HIGH",
       "status": "COMPLETED",
       "dueDate": "2026-11-04",
@@ -391,13 +695,49 @@
       "updatedAt": "2026-11-04T23:01:00Z"
     },
     {
+      "id": "task-aos-102",
+      "projectId": "proj-aos",
+      "categoryId": "cat-aos-3d",
+      "parentId": "task-aos-101",
+      "depth": 2,
+      "title": "Wire 5 custom GLSL onBeforeCompile shaders in EnvironmentBuilder3D.ts",
+      "notes": "Upward-normal cryo-frost, wind-sway foliage + depth pass, hashed office windows, FBM clouds, and orbital dome.",
+      "priority": "HIGH",
+      "status": "COMPLETED",
+      "dueDate": "2026-11-04",
+      "isMilestone": false,
+      "estimatedMinutes": 50,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-11-04T18:00:00Z",
+      "updatedAt": "2026-11-04T23:01:00Z"
+    },
+    {
+      "id": "task-aos-103",
+      "projectId": "proj-aos",
+      "categoryId": "cat-aos-3d",
+      "parentId": "task-aos-102",
+      "depth": 3,
+      "title": "Capture headless verification screenshots across Sectors 01–06 for walkthrough.md",
+      "notes": "Verify production build at port 8124 via chrome-devtools MCP.",
+      "priority": "HIGH",
+      "status": "QUEUED",
+      "dueDate": "2026-11-05",
+      "isMilestone": true,
+      "estimatedMinutes": 25,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-11-04T22:50:00Z",
+      "updatedAt": "2026-11-04T23:02:00Z"
+    },
+    {
       "id": "task-aos-200",
       "projectId": "proj-aos",
       "categoryId": "cat-aos-physics",
       "parentId": null,
       "depth": 0,
-      "title": "Integrate Explode3D interactive cutaway, X-Ray shell & cursor-rig HR Overseer",
-      "notes": "Bind [x] Explode, [u] X-Ray, [y] Section Cut, and [v] Camera Vantage flights.",
+      "title": "Integrate Explode3D Cutaway, X-Ray Shell & Cursor-Rig HR Overseer Portrait",
+      "notes": "Bind [x] Explode, [u] X-Ray, [y] Section Cut, and [v] Camera Vantage flights in Engine.ts.",
       "priority": "HIGH",
       "status": "COMPLETED",
       "dueDate": "2026-11-04",
@@ -408,7 +748,6 @@
       "createdAt": "2026-11-04T15:00:00Z",
       "updatedAt": "2026-11-04T17:15:00Z"
     },
-
     {
       "id": "task-cntrst-100",
       "projectId": "proj-contrast",
@@ -427,7 +766,24 @@
       "createdAt": "2026-10-28T10:00:00Z",
       "updatedAt": "2026-10-31T15:23:00Z"
     },
-
+    {
+      "id": "task-cntrst-101",
+      "projectId": "proj-contrast",
+      "categoryId": "cat-cntrst-ascii",
+      "parentId": "task-cntrst-100",
+      "depth": 1,
+      "title": "Calibrate ASCII glyph ramp shader & post-gravity GSAP scroll transitions",
+      "notes": "Maintain crisp typographic contrast across all 5 z-index spatial planes.",
+      "priority": "MEDIUM",
+      "status": "COMPLETED",
+      "dueDate": "2026-10-31",
+      "isMilestone": false,
+      "estimatedMinutes": 60,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-10-29T10:00:00Z",
+      "updatedAt": "2026-10-31T15:23:00Z"
+    },
     {
       "id": "task-drc-100",
       "projectId": "proj-drc",
@@ -446,7 +802,24 @@
       "createdAt": "2026-10-18T10:00:00Z",
       "updatedAt": "2026-10-21T18:43:00Z"
     },
-
+    {
+      "id": "task-drc-101",
+      "projectId": "proj-drc",
+      "categoryId": "cat-drc-reader",
+      "parentId": "task-drc-100",
+      "depth": 1,
+      "title": "Implement CSS Scroll-Driven Header Morph & Turso LibSQL Academic Reader",
+      "notes": "Morph 'Duncan R. Cordry' into 'DRC' and anchor Faculty ID Card popover via CSS Anchor Positioning.",
+      "priority": "HIGH",
+      "status": "COMPLETED",
+      "dueDate": "2026-10-21",
+      "isMilestone": false,
+      "estimatedMinutes": 80,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-10-19T10:00:00Z",
+      "updatedAt": "2026-10-21T18:43:00Z"
+    },
     {
       "id": "task-fzf-100",
       "projectId": "proj-fuzzynav",
@@ -454,7 +827,7 @@
       "parentId": null,
       "depth": 0,
       "title": "Implement directory-bubbled Git status color coding & zoxide warp transitions",
-      "notes": "Eliminate trailing key dumps in Zsh raw terminal buffer.",
+      "notes": "Eliminate trailing key dumps in Zsh raw terminal buffer (fuzzy-nav.plugin.zsh).",
       "priority": "MEDIUM",
       "status": "COMPLETED",
       "dueDate": "2026-07-18",
@@ -465,15 +838,32 @@
       "createdAt": "2026-07-15T10:00:00Z",
       "updatedAt": "2026-07-18T20:53:00Z"
     },
-
+    {
+      "id": "task-fzf-101",
+      "projectId": "proj-fuzzynav",
+      "categoryId": "cat-fzf-preview",
+      "parentId": "task-fzf-100",
+      "depth": 1,
+      "title": "Add bat syntax-highlighted file preview & cross-platform clipboard copy keybind",
+      "notes": "Support instant media metadata decoding inside fzf preview window.",
+      "priority": "LOW",
+      "status": "COMPLETED",
+      "dueDate": "2026-07-18",
+      "isMilestone": false,
+      "estimatedMinutes": 40,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-07-16T10:00:00Z",
+      "updatedAt": "2026-07-18T20:53:00Z"
+    },
     {
       "id": "task-school-100",
       "projectId": "proj-schoolos",
       "categoryId": "cat-school-erp",
       "parentId": null,
       "depth": 0,
-      "title": "Ship Supabase Student Registry, Fee Defaulter Ledger & Exam Grade Matrix",
-      "notes": "Include 10-document verification workflow and role-based middleware.",
+      "title": "Ship Supabase Student Registry, Admissions & 10-Document Verification Checklist",
+      "notes": "Full CRUD in components/modules/Students.tsx & Documents.tsx backed by lib/services/students.ts.",
       "priority": "HIGH",
       "status": "COMPLETED",
       "dueDate": "2026-04-25",
@@ -484,16 +874,33 @@
       "createdAt": "2026-04-10T10:00:00Z",
       "updatedAt": "2026-04-25T14:10:00Z"
     },
-
+    {
+      "id": "task-school-101",
+      "projectId": "proj-schoolos",
+      "categoryId": "cat-school-finance",
+      "parentId": "task-school-100",
+      "depth": 1,
+      "title": "Build Fee Defaulter Ledger, Payment History Modal & Grade-wise Exam Matrix",
+      "notes": "Modules: Finance.tsx, Academics.tsx, Staff.tsx, and Transport.tsx.",
+      "priority": "HIGH",
+      "status": "COMPLETED",
+      "dueDate": "2026-04-25",
+      "isMilestone": false,
+      "estimatedMinutes": 120,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-04-15T10:00:00Z",
+      "updatedAt": "2026-04-25T14:10:00Z"
+    },
     {
       "id": "task-atlas-100",
       "projectId": "proj-atlas",
       "categoryId": "cat-atlas-hunter",
       "parentId": null,
       "depth": 0,
-      "title": "Build Phase 1-5 Gemini 2.5 Anomaly Hunter & 3072D-to-2D UMAP Plotly Map",
-      "notes": "Persist verified internet rabbit holes in local ChromaDB semantic collection.",
-      "priority": "MEDIUM",
+      "title": "Build Phase 1–5 Gemini 2.5 Anomaly Hunter & ChromaDB Vector Pipeline",
+      "notes": "Autonomous rabbit-hole discovery in phase3_agents.py and phase4b_hunter.py.",
+      "priority": "HIGH",
       "status": "IN_PROGRESS",
       "dueDate": "2026-11-12",
       "isMilestone": true,
@@ -503,7 +910,24 @@
       "createdAt": "2026-07-10T02:03:00Z",
       "updatedAt": "2026-11-04T12:00:00Z"
     },
-
+    {
+      "id": "task-atlas-101",
+      "projectId": "proj-atlas",
+      "categoryId": "cat-atlas-umap",
+      "parentId": "task-atlas-100",
+      "depth": 1,
+      "title": "Compress 3072D embeddings to 2D UMAP coordinates for interactive Plotly map",
+      "notes": "Implemented in phase5_viz.py reading from ./atlas_chroma_db collection.",
+      "priority": "MEDIUM",
+      "status": "COMPLETED",
+      "dueDate": "2026-07-10",
+      "isMilestone": false,
+      "estimatedMinutes": 55,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-07-10T02:03:00Z",
+      "updatedAt": "2026-07-10T02:03:00Z"
+    },
     {
       "id": "task-love-100",
       "projectId": "proj-lovesite",
@@ -511,7 +935,7 @@
       "parentId": null,
       "depth": 0,
       "title": "Design Constellation Memory Map, Core Mood Vitals & Lift-to-Arm Supernova Switch",
-      "notes": "Dynamic mood-driven UI accent shifting and spring-physics card tilt.",
+      "notes": "Dynamic mood-driven UI accent shifting and spring-physics card tilt in love-os.",
       "priority": "MEDIUM",
       "status": "COMPLETED",
       "dueDate": "2026-07-12",
@@ -522,26 +946,42 @@
       "createdAt": "2026-07-01T10:00:00Z",
       "updatedAt": "2026-07-12T12:52:00Z"
     },
-
     {
       "id": "task-mahis-100",
       "projectId": "proj-mahisdb",
-      "categoryId": "cat-mahis- commerce",
+      "categoryId": "cat-mahis-commerce",
       "parentId": null,
       "depth": 0,
       "title": "Implement Prisma PostgreSQL Schema & Passwordless Email OTP Session Flow",
-      "notes": "HttpOnly session_id cookie verification for single-artist marketplace.",
-      "priority": "MEDIUM",
+      "notes": "HttpOnly session_id cookie verification for single-artist marketplace (interstellar-iron).",
+      "priority": "HIGH",
       "status": "IN_PROGRESS",
       "dueDate": "2026-11-14",
-      "isMilestone": false,
+      "isMilestone": true,
       "estimatedMinutes": 95,
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-07-10T15:00:00Z",
       "updatedAt": "2026-07-10T22:49:00Z"
     },
-
+    {
+      "id": "task-mahis-101",
+      "projectId": "proj-mahisdb",
+      "categoryId": "cat-mahis-store",
+      "parentId": "task-mahis-100",
+      "depth": 1,
+      "title": "Build artwork listing SSR pages, cart reservation & order confirmation API",
+      "notes": "Connect src/lib/prisma.ts client with protected checkout routes.",
+      "priority": "MEDIUM",
+      "status": "QUEUED",
+      "dueDate": "2026-11-16",
+      "isMilestone": false,
+      "estimatedMinutes": 75,
+      "manualOrder": 0,
+      "expanded": true,
+      "createdAt": "2026-07-10T18:00:00Z",
+      "updatedAt": "2026-07-10T22:49:00Z"
+    },
     {
       "id": "task-rheox-100",
       "projectId": "proj-rheox",
@@ -558,33 +998,37 @@
       "manualOrder": 0,
       "expanded": true,
       "createdAt": "2026-11-02T11:51:00Z",
-      "updatedAt": "2026-11-04T23:26:00Z"
+      "updatedAt": "2026-11-04T23:52:00Z"
     }
   ],
   "cliLogs": [
     {
       "id": "log-boot-1",
-      "timestamp": "23:26:01",
+      "timestamp": "23:52:01",
       "type": "SYSTEM",
-      "summary": "YXB // CMD Sovereign Agentic Console v2.5 initialized (client:load hydration complete)",
-      "detail": "workspace_root: ~/Documents/Github (11 repositories indexed) | theme: charcoal (#0F0F11) + clay (#E05C36)",
+      "scope": "GLOBAL",
+      "summary": "YXB // CMD Sovereign Agentic Console v3.0 initialized (Global + Local CWD Scope + Phone Sync)",
+      "detail": "workspace_root: ~/Documents/Github (11 repositories indexed) | cli: ~/.local/bin/yxb",
       "accent": true
     },
     {
       "id": "log-boot-2",
-      "timestamp": "23:26:02",
+      "timestamp": "23:52:02",
       "type": "TOOL_CALL",
+      "scope": "GLOBAL",
       "toolName": "WorkspaceScanner",
-      "summary": "Indexed 11 repositories in ~/Documents/Github -> attached to [p] Browse Project menu",
+      "summary": "Synced live Git branches & generated per-repo TASKS.md blueprints across all 11 repositories",
       "detail": "repos: [dashboard, portyxb, AOS, Contrast, DRC, fuzzy-nav, schoolos, atlas-of-the-bizarre, Lovesite, mahis-DB, RheoX]"
     },
     {
       "id": "log-boot-3",
-      "timestamp": "23:26:03",
+      "timestamp": "23:52:03",
       "type": "DIFF",
-      "toolName": "AgentProtocolHook",
-      "summary": "Active Global Agent Rules mounted at ~/Documents/Github/AGENTS.md & ~/.agents/skills/dashboard-sync",
-      "detail": "+ All future agents automatically initialize projects and log changes via scripts/agent-sync.mjs"
+      "scope": "LOCAL",
+      "projectCode": "YXB-CMD",
+      "toolName": "Panel3UnifiedComposer",
+      "summary": "Consolidated all L0..L3 Task & Subtask creation and metadata editing into Panel 3 (RightInspectorPanel)",
+      "detail": "+ Press [a] anywhere or click [+] on any subtask to spawn nested children up to depth L3"
     }
   ]
 }

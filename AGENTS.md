@@ -4,11 +4,22 @@ This directory (`/Users/yashbhardwaj/Documents/Github`) is governed by **YXB // 
 
 All AI coding agents (Antigravity, Claude Code, Cursor, Codex, and subagents) operating in `/Users/yashbhardwaj/Documents/Github` or any of its child repositories MUST follow this protocol:
 
-## 1. Initializing New Projects in `~/Documents/Github`
-Whenever you create or initialize a new project/repository inside `/Users/yashbhardwaj/Documents/Github/<repo>`, you MUST register it on the **YXB // CMD** dashboard so it appears immediately in the `~/workspace` **Browse Project (`[p]`)** menu:
+## 1. Local Per-Repo Blueprint (`TASKS.md`) & Scoped CLI (`yxb`)
+Every repository in `~/Documents/Github/<repo>` has an auto-synced **`TASKS.md`** blueprint in its root folder, and the global **`yxb`** CLI (`~/.local/bin/yxb`) automatically detects which repository you are inside via `process.cwd()`:
 
 ```bash
-node /Users/yashbhardwaj/Documents/Github/dashboard/scripts/agent-sync.mjs init-project \
+yxb status                                  # View current repo's Git status & L0..L3 task tree
+yxb add "New root task title" -p HIGH -m    # Add L0 parent task to current repo
+yxb sub <parent-task-id> "Subtask title"    # Add nested subtask (L1..L3) under <parent-task-id>
+yxb done <task-id>                          # Mark task COMPLETED & regenerate <repo>/TASKS.md
+yxb log "Concise summary of code changes"   # Append telemetry diff entry for current repo
+```
+
+## 2. Initializing New Projects in `~/Documents/Github`
+Whenever you create or initialize a new project/repository inside `/Users/yashbhardwaj/Documents/Github/<repo>`, register it immediately on **YXB // CMD** so it appears in the `~/workspace` **Browse Project (`[p]`)** menu and receives its own `TASKS.md`:
+
+```bash
+yxb init-project \
   --code "<SHORT_CODE>" \
   --name "<Project Name>" \
   --path "~/Documents/Github/<repo>" \
@@ -16,35 +27,10 @@ node /Users/yashbhardwaj/Documents/Github/dashboard/scripts/agent-sync.mjs init-
   --desc "<One-line architectural summary>"
 ```
 
-## 2. Tracking Tasks, Milestones & Subtasks (`L0..L3`)
-When planning or executing a feature, refactor, or architectural milestone in any repository under `~/Documents/Github/*`, record the task or subtask on the dashboard:
-
+## 3. Global Sync & Phone/GitHub Cloud Bridge
 ```bash
-node /Users/yashbhardwaj/Documents/Github/dashboard/scripts/agent-sync.mjs add-task \
-  --project "<project-id-or-code>" \
-  --title "<Task or Subtask Title>" \
-  --priority "HIGH" \
-  --milestone
+yxb status -g                               # View all 11+ repositories in ~/Documents/Github
+yxb sync                                    # Probe live Git branches & update all TASKS.md files
+yxb pull                                    # Pull remote/phone task edits from GitHub
+yxb push                                    # Commit & push registry to GitHub (claw-h/dashboard)
 ```
-
-When completing a tracked task:
-
-```bash
-node /Users/yashbhardwaj/Documents/Github/dashboard/scripts/agent-sync.mjs complete-task \
-  --id "<task-id>"
-```
-
-## 3. Logging Architectural Changes to the `YXB // CMD` Stream
-After completing significant code changes in any repository under `~/Documents/Github/*`, append a structured telemetry entry to the dashboard stream:
-
-```bash
-node /Users/yashbhardwaj/Documents/Github/dashboard/scripts/agent-sync.mjs log \
-  --project "<project-id-or-code>" \
-  --tool "AgentCommit" \
-  --summary "<Concise summary of what was built or fixed>" \
-  --detail "<Modified files or verification results>"
-```
-
-## 4. Canonical Registry Location
-- Registry JSON: `/Users/yashbhardwaj/Documents/Github/dashboard/src/data/workspaceRegistry.json`
-- CLI Utility: `/Users/yashbhardwaj/Documents/Github/dashboard/scripts/agent-sync.mjs`

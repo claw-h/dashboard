@@ -8,7 +8,7 @@ import type {
   WorkspaceRegistryPayload,
 } from '../types/schedule';
 
-export const STORAGE_KEY = 'yxb_cmd_command_center_v2';
+export const STORAGE_KEY = 'yxb_cmd_command_center_v3';
 
 export function createInitialSeedState(): ScheduleState {
   const payload = registryData as unknown as WorkspaceRegistryPayload;
@@ -33,11 +33,15 @@ export function createInitialSeedState(): ScheduleState {
     selectedTaskId: firstTask,
     selectedLeftIndex: 0,
     selectedRightSubtaskId: null,
+    composerTargetParentId: firstTask,
+    composerMode: 'SUBTASK',
     activeMode: 'SCHEDULE',
+    cliScope: 'LOCAL',
     focusedPanel: 'CENTER',
     inputMode: 'NORMAL',
     projectBrowserOpen: false,
     agentProtocolOpen: false,
+    cloudSyncOpen: false,
     leftPanelCollapsed: false,
     rightPanelExpanded: true,
     sortBy: 'MANUAL',
@@ -46,15 +50,11 @@ export function createInitialSeedState(): ScheduleState {
     regexQuery: '',
     lastKeyPressed: 'BOOT',
     statusMessage:
-      'YXB // CMD READY — [p] Browse 11 Projects | [g] Agent Protocol | [j/k] Nav | [a] Add Task | [t/c] Mode',
+      'YXB // CMD v3.0 — [p] Browse 11 Repos | [a] Panel 3 Composer | [g] Agent CLI | [t/c] Mode',
     cliLogs: payload.cliLogs,
   };
 }
 
-/**
- * Loads state from LocalStorage and merges any newly registered projects, categories,
- * or tasks from `src/data/workspaceRegistry.json` (written by `scripts/agent-sync.mjs`).
- */
 export function loadScheduleState(): ScheduleState {
   const seed = createInitialSeedState();
   if (typeof window === 'undefined') {
@@ -68,14 +68,26 @@ export function loadScheduleState(): ScheduleState {
       return seed;
     }
 
-    // Merge canonical registry projects with stored projects so new CLI-added repos always appear
     const projectMap = new Map<string, Project>();
     for (const p of seed.projects) {
       projectMap.set(p.id, p);
     }
     for (const p of parsed.projects) {
       const canonical = projectMap.get(p.id);
-      projectMap.set(p.id, canonical ? { ...canonical, ...p, stack: canonical.stack, localPath: canonical.localPath } : p);
+      projectMap.set(
+        p.id,
+        canonical
+          ? {
+              ...canonical,
+              ...p,
+              stack: canonical.stack,
+              localPath: canonical.localPath,
+              gitBranch: canonical.gitBranch ?? p.gitBranch,
+              gitDirtyCount: canonical.gitDirtyCount ?? p.gitDirtyCount,
+              lastCommit: canonical.lastCommit ?? p.lastCommit,
+            }
+          : p
+      );
     }
 
     const categoryMap = new Map<string, Category>();
@@ -91,9 +103,7 @@ export function loadScheduleState(): ScheduleState {
       ...parsed.tasks,
     };
 
-    const mergedLogs: CliLogEntry[] = [
-      ...(parsed.cliLogs ?? []),
-    ];
+    const mergedLogs: CliLogEntry[] = [...(parsed.cliLogs ?? [])];
     for (const seedLog of seed.cliLogs) {
       if (!mergedLogs.some((l) => l.id === seedLog.id)) {
         mergedLogs.push(seedLog);
@@ -116,6 +126,7 @@ export function loadScheduleState(): ScheduleState {
       inputMode: 'NORMAL',
       projectBrowserOpen: false,
       agentProtocolOpen: false,
+      cloudSyncOpen: false,
       lastKeyPressed: 'SYNC',
       statusMessage: `YXB // CMD — Synced ${mergedProjects.length} ~/Documents/Github repositories`,
       cliLogs: mergedLogs.slice(-60),
@@ -136,6 +147,7 @@ export function saveScheduleState(state: ScheduleState): void {
       selectedCategoryId: state.selectedCategoryId,
       selectedTaskId: state.selectedTaskId,
       activeMode: state.activeMode,
+      cliScope: state.cliScope,
       focusedPanel: state.focusedPanel,
       leftPanelCollapsed: state.leftPanelCollapsed,
       rightPanelExpanded: state.rightPanelExpanded,

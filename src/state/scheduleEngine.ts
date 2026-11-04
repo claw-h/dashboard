@@ -2,6 +2,7 @@ import type {
   ActivePanel,
   Category,
   CliLogEntry,
+  CliScopeMode,
   InputMode,
   Priority,
   Project,
@@ -13,6 +14,7 @@ import type {
   TaskStatus,
   VisibleTaskRow,
   WorkspaceMode,
+  WorkspaceRegistryPayload,
 } from '../types/schedule';
 import { createInitialSeedState } from './storage';
 
@@ -243,9 +245,13 @@ export type ScheduleAction =
   | { type: 'CYCLE_PANEL_FOCUS' }
   | { type: 'SET_PANEL_FOCUS'; panel: ActivePanel }
   | { type: 'SET_WORKSPACE_MODE'; mode: WorkspaceMode; keyHint?: string }
+  | { type: 'SET_CLI_SCOPE'; scope: CliScopeMode }
   | { type: 'SET_INPUT_MODE'; mode: InputMode; keyHint?: string }
+  | { type: 'FOCUS_PANEL3_COMPOSER'; mode?: 'ROOT' | 'SUBTASK'; targetParentId?: string | null }
   | { type: 'TOGGLE_PROJECT_BROWSER'; open?: boolean }
   | { type: 'TOGGLE_AGENT_PROTOCOL'; open?: boolean }
+  | { type: 'TOGGLE_CLOUD_SYNC'; open?: boolean }
+  | { type: 'APPLY_REMOTE_REGISTRY'; payload: WorkspaceRegistryPayload; sourceLabel: string }
   | { type: 'SELECT_PROJECT_CATEGORY'; projectId: string; categoryId: string | 'ALL'; closeBrowser?: boolean }
   | { type: 'TOGGLE_PROJECT_EXPAND'; projectId: string }
   | {
@@ -258,10 +264,22 @@ export type ScheduleAction =
       lifecycle?: ProjectLifecycle;
     }
   | { type: 'SELECT_TASK'; taskId: string }
-  | { type: 'ADD_TASK_INLINE'; title: string; priority: Priority; dueDate: string; asSubtask: boolean }
-  | { type: 'DELETE_SELECTED_TASK' }
+  | {
+      type: 'ADD_TASK_PANEL3';
+      title: string;
+      notes?: string;
+      priority: Priority;
+      dueDate: string;
+      isMilestone?: boolean;
+      categoryId?: string;
+      mode: 'ROOT' | 'SUBTASK';
+      targetParentId?: string | null;
+    }
+  | { type: 'DELETE_TASK_BY_ID'; taskId?: string }
   | { type: 'UPDATE_TASK_METADATA'; taskId: string; title: string; priority: Priority; status: TaskStatus; dueDate: string; estimatedMinutes: number; notes: string }
   | { type: 'CYCLE_TASK_STATUS'; taskId?: string }
+  | { type: 'SET_TASK_PRIORITY'; taskId: string; priority: Priority }
+  | { type: 'SET_TASK_STATUS'; taskId: string; status: TaskStatus }
   | { type: 'TOGGLE_MILESTONE'; taskId?: string }
   | { type: 'TOGGLE_TASK_EXPAND'; taskId?: string }
   | { type: 'REORDER_TASK_PRIORITY'; direction: 'UP' | 'DOWN' }
@@ -270,6 +288,7 @@ export type ScheduleAction =
   | { type: 'SET_FILTER_QUERY'; query: string }
   | { type: 'SET_REGEX_QUERY'; query: string }
   | { type: 'EXECUTE_CLI_COMMAND'; rawCommand: string }
+  | { type: 'APPEND_CLI_LOG'; entry: Omit<CliLogEntry, 'id' | 'timestamp'> }
   | { type: 'RESET_SEED_DATA' }
   | { type: 'SYNC_FROM_STORAGE'; state: ScheduleState };
 
@@ -304,9 +323,11 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
           statusMessage: `NAV [LEFT] -> ${item.label}`,
         };
         const { rows } = selectVisibleTaskRows(tempState);
+        const firstId = rows[0]?.task.id ?? null;
         return {
           ...tempState,
-          selectedTaskId: rows[0]?.task.id ?? null,
+          selectedTaskId: firstId,
+          composerTargetParentId: firstId,
         };
       }
 
@@ -316,7 +337,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
           return {
             ...state,
             lastKeyPressed: keyName,
-            statusMessage: 'Inspector: Selected task has no nested subtasks yet (press [a] to add)',
+            statusMessage: 'Panel 3: Selected task has no nested subtasks yet (use Composer above)',
           };
         }
         const currentIdx = subtree.findIndex((t) => t.id === state.selectedRightSubtaskId);
@@ -328,8 +349,9 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         return {
           ...state,
           selectedRightSubtaskId: target.id,
+          composerTargetParentId: target.id,
           lastKeyPressed: keyName,
-          statusMessage: `INSPECTOR SUBTASK [L${target.depth}] -> ${target.title}`,
+          statusMessage: `PANEL 3 SUBTASK [L${target.depth}] -> ${target.title}`,
         };
       }
 
@@ -344,6 +366,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       return {
         ...state,
         selectedTaskId: nextTask.id,
+        composerTargetParentId: nextTask.id,
         selectedRightSubtaskId: null,
         lastKeyPressed: keyName,
         statusMessage: `CURSOR [${nextIdx + 1}/${rows.length}] L${nextTask.depth} :: ${nextTask.title}`,
@@ -357,7 +380,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
           leftPanelCollapsed: false,
           focusedPanel: 'LEFT',
           lastKeyPressed: 'h',
-          statusMessage: 'FOCUS -> LEFT PANEL (Project Tree & Category Filters) | Press [h] again to collapse',
+          statusMessage: 'FOCUS -> PANEL 01 (Workspace Tree) | Press [h] again to collapse',
         };
       }
       const collapsed = !state.leftPanelCollapsed;
@@ -367,8 +390,8 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         focusedPanel: collapsed ? 'CENTER' : 'LEFT',
         lastKeyPressed: 'h',
         statusMessage: collapsed
-          ? 'LEFT PANEL COLLAPSED -> Focus returned to CENTER Workspace'
-          : 'LEFT PANEL EXPANDED',
+          ? 'PANEL 01 COLLAPSED -> Focus returned to CENTER Workspace'
+          : 'PANEL 01 EXPANDED',
       };
     }
 
@@ -378,7 +401,27 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         rightPanelExpanded: true,
         focusedPanel: 'RIGHT',
         lastKeyPressed: 'l',
-        statusMessage: 'FOCUS -> RIGHT INSPECTOR PANEL (Subtask Breakdown & Telemetry)',
+        statusMessage: 'FOCUS -> PANEL 03 (Unified Task & Subtask Composer + Inspector)',
+      };
+    }
+
+    case 'FOCUS_PANEL3_COMPOSER': {
+      const parentId =
+        action.targetParentId !== undefined ? action.targetParentId : state.selectedTaskId;
+      const resolvedMode =
+        action.mode ?? (parentId && state.tasks[parentId] ? 'SUBTASK' : 'ROOT');
+      return {
+        ...state,
+        rightPanelExpanded: true,
+        focusedPanel: 'RIGHT',
+        inputMode: 'INLINE_ADD',
+        composerMode: resolvedMode,
+        composerTargetParentId: parentId ?? state.selectedTaskId,
+        lastKeyPressed: 'a',
+        statusMessage:
+          resolvedMode === 'SUBTASK' && parentId && state.tasks[parentId]
+            ? `PANEL 03 COMPOSER -> Adding nested subtask under "${state.tasks[parentId].title.slice(0, 32)}..."`
+            : 'PANEL 03 COMPOSER -> Adding new Root Task (L0)',
       };
     }
 
@@ -411,16 +454,24 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         inputMode: 'NORMAL',
         projectBrowserOpen: false,
         agentProtocolOpen: false,
+        cloudSyncOpen: false,
         lastKeyPressed: action.keyHint ?? (action.mode === 'SCHEDULE' ? 't' : 'c'),
         statusMessage:
           action.mode === 'SCHEDULE'
             ? 'MODE -> SCHEDULE WORKSPACE (Hierarchical Task Architecture)'
-            : 'MODE -> CLI STREAM WORKSPACE (YXB // CMD Execution & Telemetry Stream)',
-        cliLogs: appendLog(state, {
-          type: 'COMMAND',
-          command: action.mode === 'SCHEDULE' ? ':mode schedule' : ':mode cli-stream',
-          summary: `Switched center viewport to ${action.mode} mode`,
-        }),
+            : `MODE -> CLI STREAM (${state.cliScope} SCOPE)`,
+      };
+    }
+
+    case 'SET_CLI_SCOPE': {
+      const activeProj = state.projects.find((p) => p.id === state.selectedProjectId);
+      return {
+        ...state,
+        cliScope: action.scope,
+        statusMessage:
+          action.scope === 'LOCAL'
+            ? `CLI SCOPE -> LOCAL REPO (${activeProj?.code ?? state.selectedProjectId})`
+            : `CLI SCOPE -> GLOBAL WORKSPACE (${state.projects.length} repositories)`,
       };
     }
 
@@ -428,25 +479,22 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       return {
         ...state,
         inputMode: action.mode,
-        projectBrowserOpen: action.mode === 'PROJECT_BROWSER' ? true : false,
-        agentProtocolOpen: action.mode === 'AGENT_PROTOCOL' ? true : false,
+        projectBrowserOpen: action.mode === 'PROJECT_BROWSER',
+        agentProtocolOpen: action.mode === 'AGENT_PROTOCOL',
+        cloudSyncOpen: action.mode === 'CLOUD_SYNC',
         lastKeyPressed: action.keyHint ?? state.lastKeyPressed,
         statusMessage:
           action.mode === 'NORMAL'
             ? '-- NORMAL MODE --'
             : action.mode === 'INLINE_ADD'
-            ? '-- INSERT TASK/SUBTASK -- (Enter to commit, Tab to toggle Root/Subtask, Esc to cancel)'
+            ? '-- PANEL 03 COMPOSER [a] -- Enter title & press Enter to create Task/Subtask'
             : action.mode === 'INLINE_EDIT'
-            ? '-- EDIT METADATA -- (Enter to save, Esc to cancel)'
+            ? '-- PANEL 03 INSPECTOR EDIT [e] --'
             : action.mode === 'SEARCH_REGEX'
-            ? '-- REGEX SEARCH (/) -- Type regular expression pattern, Enter/Esc to lock'
+            ? '-- REGEX SEARCH [/] --'
             : action.mode === 'FILTER_BAR'
-            ? '-- FILTER BAR (i) -- Filter by keyword, priority, or status'
-            : action.mode === 'PROJECT_BROWSER'
-            ? '-- BROWSE PROJECT [p] -- Select any ~/Documents/Github repository or initialize a new one'
-            : action.mode === 'AGENT_PROTOCOL'
-            ? '-- AGENT PROTOCOL [g] -- Global Multi-Agent Sync Rules & CLI Commands'
-            : '-- CLI PROMPT --',
+            ? '-- FILTER BAR [i] --'
+            : `-- ${action.mode} --`,
       };
     }
 
@@ -456,6 +504,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         ...state,
         projectBrowserOpen: nextOpen,
         agentProtocolOpen: false,
+        cloudSyncOpen: false,
         inputMode: nextOpen ? 'PROJECT_BROWSER' : 'NORMAL',
         lastKeyPressed: 'p',
         statusMessage: nextOpen
@@ -470,11 +519,63 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         ...state,
         agentProtocolOpen: nextOpen,
         projectBrowserOpen: false,
+        cloudSyncOpen: false,
         inputMode: nextOpen ? 'AGENT_PROTOCOL' : 'NORMAL',
         lastKeyPressed: 'g',
         statusMessage: nextOpen
-          ? 'AGENT CONTEXT PROTOCOL OPEN — Global rules active for all future agents'
+          ? 'AGENT CONTEXT PROTOCOL OPEN — Global & Local CLI (`yxb`) active'
           : '-- NORMAL MODE --',
+      };
+    }
+
+    case 'TOGGLE_CLOUD_SYNC': {
+      const nextOpen = action.open ?? !state.cloudSyncOpen;
+      return {
+        ...state,
+        cloudSyncOpen: nextOpen,
+        projectBrowserOpen: false,
+        agentProtocolOpen: false,
+        inputMode: nextOpen ? 'CLOUD_SYNC' : 'NORMAL',
+        lastKeyPressed: 's',
+        statusMessage: nextOpen
+          ? 'GITHUB PHONE / CLOUD SYNC BRIDGE OPEN'
+          : '-- NORMAL MODE --',
+      };
+    }
+
+    case 'APPLY_REMOTE_REGISTRY': {
+      const { payload, sourceLabel } = action;
+      const tasksMap: Record<string, TaskNode> = {};
+      for (const t of payload.tasks) {
+        tasksMap[t.id] = t;
+      }
+      const nextProjId =
+        payload.projects.some((p) => p.id === state.selectedProjectId)
+          ? state.selectedProjectId
+          : payload.projects[0]?.id ?? 'proj-dashboard';
+
+      const tempState: ScheduleState = {
+        ...state,
+        projects: payload.projects,
+        categories: payload.categories,
+        tasks: tasksMap,
+        selectedProjectId: nextProjId,
+        cloudSyncOpen: false,
+        inputMode: 'NORMAL',
+        statusMessage: `SYNCED FROM ${sourceLabel}: ${payload.projects.length} repos, ${payload.tasks.length} tasks`,
+        cliLogs: appendLog(state, {
+          type: 'SYSTEM',
+          scope: 'GLOBAL',
+          toolName: 'GitHubCloudSync',
+          summary: `Synced ${payload.projects.length} projects & ${payload.tasks.length} tasks from ${sourceLabel}`,
+          accent: true,
+        }),
+      };
+      const { rows } = selectVisibleTaskRows(tempState);
+      return {
+        ...tempState,
+        selectedTaskId: rows[0]?.task.id ?? null,
+        composerTargetParentId: rows[0]?.task.id ?? null,
       };
     }
 
@@ -499,12 +600,14 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         selectedCategoryId: action.categoryId,
         projectBrowserOpen: action.closeBrowser ? false : state.projectBrowserOpen,
         inputMode: action.closeBrowser ? 'NORMAL' : state.inputMode,
-        statusMessage: `SWITCHED WORKSPACE -> ${selectedProj?.localPath ?? action.projectId} (${selectedProj?.name ?? ''})`,
+        statusMessage: `LOCAL SCOPE -> ${selectedProj?.code ?? action.projectId} (${selectedProj?.localPath ?? ''})`,
       };
       const { rows } = selectVisibleTaskRows(tempState);
+      const firstId = rows[0]?.task.id ?? null;
       return {
         ...tempState,
-        selectedTaskId: rows[0]?.task.id ?? null,
+        selectedTaskId: firstId,
+        composerTargetParentId: firstId,
       };
     }
 
@@ -528,6 +631,9 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         stack: action.stack.length > 0 ? action.stack : ['Astro', 'TypeScript'],
         lifecycle: action.lifecycle ?? 'ACTIVE',
         lastAgentSync: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        gitBranch: 'main',
+        gitDirtyCount: 0,
+        lastCommit: 'Initial project registration',
         order: state.projects.length,
         expanded: true,
       };
@@ -546,7 +652,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         categoryId: newCatId,
         parentId: null,
         depth: 0,
-        title: `Initialize ${cleanName} architecture & register with YXB // CMD`,
+        title: `Initialize ${cleanName} architecture & sync with YXB // CMD`,
         notes: `Initialized at ${newProj.localPath} with stack [${newProj.stack.join(', ')}].`,
         priority: 'HIGH',
         status: 'IN_PROGRESS',
@@ -570,11 +676,14 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         selectedProjectId: newProjId,
         selectedCategoryId: 'ALL',
         selectedTaskId: newTaskId,
+        composerTargetParentId: newTaskId,
         projectBrowserOpen: false,
         inputMode: 'NORMAL',
         statusMessage: `INITIALIZED PROJECT [${cleanCode}] at ${newProj.localPath}`,
         cliLogs: appendLog(state, {
           type: 'MUTATION',
+          scope: 'GLOBAL',
+          projectCode: cleanCode,
           toolName: 'RegisterProject',
           summary: `Initialized new project "${cleanName}" (${cleanCode}) at ${newProj.localPath}`,
           detail: `stack: [${newProj.stack.join(', ')}] | initial_milestone: ${newTaskId}`,
@@ -589,66 +698,74 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       return {
         ...state,
         selectedTaskId: action.taskId,
+        composerTargetParentId: action.taskId,
         selectedRightSubtaskId: null,
-        statusMessage: `Selected [L${target.depth}] ${target.title}`,
+        statusMessage: `Selected [L${target.depth}] (${target.id}) ${target.title}`,
       };
     }
 
-    case 'ADD_TASK_INLINE': {
+    case 'ADD_TASK_PANEL3': {
       const cleanTitle = action.title.trim();
-      if (!cleanTitle) {
-        return {
-          ...state,
-          inputMode: 'NORMAL',
-          statusMessage: 'Task creation cancelled (empty title)',
-        };
-      }
+      if (!cleanTitle) return state;
 
-      const selectedTask = state.selectedTaskId ? state.tasks[state.selectedTaskId] : null;
-      const defaultCat =
-        state.selectedCategoryId !== 'ALL'
-          ? state.selectedCategoryId
-          : selectedTask?.categoryId ??
-            state.categories.find((c) => c.projectId === state.selectedProjectId)?.id ??
-            'cat-cmd-core';
+      const activeProj = state.projects.find((p) => p.id === state.selectedProjectId);
+      const parentCandidateId =
+        action.targetParentId !== undefined
+          ? action.targetParentId
+          : state.composerTargetParentId ?? state.selectedTaskId;
+      const parentNode =
+        action.mode === 'SUBTASK' && parentCandidateId ? state.tasks[parentCandidateId] : null;
 
       let parentId: string | null = null;
       let depth: 0 | 1 | 2 | 3 = 0;
 
-      if (action.asSubtask && selectedTask && selectedTask.projectId === state.selectedProjectId) {
-        if (selectedTask.depth < 3) {
-          parentId = selectedTask.id;
-          depth = (selectedTask.depth + 1) as 1 | 2 | 3;
+      if (action.mode === 'SUBTASK' && parentNode && parentNode.projectId === state.selectedProjectId) {
+        if (parentNode.depth < 3) {
+          parentId = parentNode.id;
+          depth = (parentNode.depth + 1) as 1 | 2 | 3;
         } else {
-          parentId = selectedTask.parentId;
+          parentId = parentNode.parentId;
           depth = 3;
         }
       }
 
+      const resolvedCategoryId =
+        parentNode && action.mode === 'SUBTASK'
+          ? parentNode.categoryId
+          : action.categoryId ||
+            (state.selectedCategoryId !== 'ALL'
+              ? state.selectedCategoryId
+              : state.categories.find((c) => c.projectId === state.selectedProjectId)?.id ??
+                'cat-cmd-core');
+
       const siblings = Object.values(state.tasks).filter(
         (t) =>
           t.projectId === state.selectedProjectId &&
-          t.categoryId === defaultCat &&
+          t.categoryId === resolvedCategoryId &&
           t.parentId === parentId
       );
       const nextOrder =
         siblings.length > 0 ? Math.max(...siblings.map((s) => s.manualOrder)) + 1 : 0;
 
-      const newId = `task-${Date.now().toString().slice(-5)}`;
+      const projPrefix = (activeProj?.code ?? 'task').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const newId = `task-${projPrefix}-${Date.now().toString().slice(-4)}`;
       const now = new Date().toISOString();
+
       const newTask: TaskNode = {
         id: newId,
         projectId: state.selectedProjectId,
-        categoryId: selectedTask && action.asSubtask ? selectedTask.categoryId : defaultCat,
+        categoryId: resolvedCategoryId,
         parentId,
         depth,
         title: cleanTitle,
-        notes: `Created via inline YXB // CMD prompt at depth L${depth}.`,
+        notes:
+          action.notes?.trim() ||
+          `Created in Panel 3 Composer (${depth === 0 ? 'Root Task L0' : `Nested Subtask L${depth}`}).`,
         priority: action.priority,
         status: 'QUEUED',
         dueDate: action.dueDate || '2026-11-10',
-        isMilestone: false,
-        estimatedMinutes: 30,
+        isMilestone: Boolean(action.isMilestone),
+        estimatedMinutes: depth === 0 ? 60 : 25,
         manualOrder: nextOrder,
         expanded: true,
         createdAt: now,
@@ -663,25 +780,29 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       return {
         ...state,
         tasks: nextTasks,
-        selectedTaskId: newId,
+        selectedTaskId: depth === 0 ? newId : state.selectedTaskId ?? newId,
+        composerTargetParentId: depth === 0 ? newId : parentId ?? newId,
         inputMode: 'NORMAL',
         lastKeyPressed: 'a',
-        statusMessage: `CREATED [L${depth}] "${cleanTitle}" (${action.priority})`,
+        statusMessage: `ADDED [L${depth}] (${newId}) "${cleanTitle}" -> ${activeProj?.code ?? ''}`,
         cliLogs: appendLog(state, {
           type: 'MUTATION',
-          toolName: 'CreateTaskNode',
-          summary: `Added L${depth} ${depth === 0 ? 'Parent Task' : 'Subtask'} "${cleanTitle}" [${action.priority}]`,
-          detail: `id: ${newId} | project: ${state.selectedProjectId} | parent: ${parentId ?? 'ROOT'}`,
+          scope: 'LOCAL',
+          projectCode: activeProj?.code,
+          toolName: 'Panel3CreateNode',
+          summary: `[${activeProj?.code}] Added L${depth} ${depth === 0 ? 'Root Task' : 'Subtask'} "${cleanTitle}" (${action.priority})`,
+          detail: `id: ${newId} | parent: ${parentId ?? 'ROOT'} | category: ${resolvedCategoryId}`,
           accent: true,
         }),
       };
     }
 
-    case 'DELETE_SELECTED_TASK': {
+    case 'DELETE_TASK_BY_ID': {
       const targetId =
-        state.focusedPanel === 'RIGHT' && state.selectedRightSubtaskId
+        action.taskId ??
+        (state.focusedPanel === 'RIGHT' && state.selectedRightSubtaskId
           ? state.selectedRightSubtaskId
-          : state.selectedTaskId;
+          : state.selectedTaskId);
 
       if (!targetId || !state.tasks[targetId]) {
         return {
@@ -716,17 +837,23 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
 
       const remainingRows = rows.filter((r) => !toDelete.has(r.task.id));
       const fallbackRow =
-        remainingRows[Math.min(currentRowIdx, remainingRows.length - 1)] ?? null;
+        remainingRows[Math.min(Math.max(0, currentRowIdx), remainingRows.length - 1)] ?? null;
+      const nextSelected =
+        state.selectedTaskId && !toDelete.has(state.selectedTaskId)
+          ? state.selectedTaskId
+          : fallbackRow?.task.id ?? null;
 
       return {
         ...state,
         tasks: nextTasks,
-        selectedTaskId: fallbackRow ? fallbackRow.task.id : null,
+        selectedTaskId: nextSelected,
+        composerTargetParentId: nextSelected,
         selectedRightSubtaskId: null,
         lastKeyPressed: 'd',
         statusMessage: `DELETED "${targetTask.title}" (${toDelete.size} node${toDelete.size > 1 ? 's' : ''} removed)`,
         cliLogs: appendLog(state, {
           type: 'DIFF',
+          scope: 'LOCAL',
           toolName: 'DeleteTaskSubtree',
           summary: `- Removed "${targetTask.title}" and ${toDelete.size - 1} nested subtask(s)`,
           detail: `deleted_ids: [${Array.from(toDelete).join(', ')}]`,
@@ -755,13 +882,41 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         },
         inputMode: 'NORMAL',
         lastKeyPressed: 'e',
-        statusMessage: `UPDATED "${updated.title}" -> [${updated.priority} | ${updated.status} | due ${updated.dueDate}]`,
-        cliLogs: appendLog(state, {
-          type: 'MUTATION',
-          toolName: 'PatchTaskMetadata',
-          summary: `Edited "${updated.title}" (${updated.priority}, ${updated.status})`,
-          detail: `due: ${updated.dueDate} | est: ${updated.estimatedMinutes}m`,
-        }),
+        statusMessage: `SAVED [${updated.id}] "${updated.title}"`,
+      };
+    }
+
+    case 'SET_TASK_PRIORITY': {
+      const current = state.tasks[action.taskId];
+      if (!current) return state;
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          [action.taskId]: {
+            ...current,
+            priority: action.priority,
+            updatedAt: new Date().toISOString(),
+          },
+        },
+        statusMessage: `PRIORITY [${current.id}] -> ${action.priority}`,
+      };
+    }
+
+    case 'SET_TASK_STATUS': {
+      const current = state.tasks[action.taskId];
+      if (!current) return state;
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          [action.taskId]: {
+            ...current,
+            status: action.status,
+            updatedAt: new Date().toISOString(),
+          },
+        },
+        statusMessage: `STATUS [${current.id}] -> ${action.status}`,
       };
     }
 
@@ -783,6 +938,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         statusMessage: `STATUS [${updated.title}] -> ${nextStatus}`,
         cliLogs: appendLog(state, {
           type: 'MUTATION',
+          scope: 'LOCAL',
           toolName: 'StatusTransition',
           summary: `${current.status} -> ${nextStatus} :: "${updated.title}"`,
         }),
@@ -808,6 +964,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
           : `◇ Unmarked milestone :: "${updated.title}"`,
         cliLogs: appendLog(state, {
           type: 'MUTATION',
+          scope: 'LOCAL',
           toolName: 'ToggleMilestone',
           summary: `${nextMilestone ? '◆ Promoted to Milestone' : '◇ Removed Milestone'}: "${updated.title}"`,
           accent: nextMilestone,
@@ -851,7 +1008,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         return {
           ...state,
           lastKeyPressed: keyName,
-          statusMessage: `Task "${target.title}" is already at the ${action.direction === 'UP' ? 'top' : 'bottom'} of its sibling priority group`,
+          statusMessage: `Task "${target.title}" is already at the ${action.direction === 'UP' ? 'top' : 'bottom'} of its sibling group`,
         };
       }
 
@@ -874,12 +1031,6 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         sortBy: 'MANUAL',
         lastKeyPressed: keyName,
         statusMessage: `REORDERED [${keyName}] Moved "${target.title}" ${action.direction} to slot #${swapIdx + 1}/${reordered.length}`,
-        cliLogs: appendLog(state, {
-          type: 'DIFF',
-          toolName: 'ReorderPriority',
-          summary: `[${keyName}] Shifted "${target.title}" ${action.direction.toLowerCase()} in sibling priority order (#${swapIdx + 1})`,
-          accent: true,
-        }),
       };
     }
 
@@ -928,18 +1079,30 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       };
     }
 
+    case 'APPEND_CLI_LOG': {
+      return {
+        ...state,
+        cliLogs: appendLog(state, action.entry),
+      };
+    }
+
     case 'EXECUTE_CLI_COMMAND': {
       const raw = action.rawCommand.trim();
       if (!raw) return state;
 
+      const activeProj = state.projects.find((p) => p.id === state.selectedProjectId);
+      const cleaned = raw.replace(/^yxb\s+/i, '').trim();
+      const lower = cleaned.toLowerCase();
+
       const withCmdLog = appendLog(state, {
         type: 'COMMAND',
+        scope: state.cliScope,
+        projectCode: activeProj?.code,
         command: raw,
-        summary: `yxb > ${raw}`,
+        summary: `yxb (${state.cliScope === 'LOCAL' ? activeProj?.code : 'GLOBAL'}) > ${raw}`,
         accent: true,
       });
 
-      const lower = raw.toLowerCase();
       if (lower === 'clear' || lower === '/clear') {
         return {
           ...state,
@@ -948,6 +1111,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               id: `log-${Date.now()}`,
               timestamp: nowTimeStr(),
               type: 'SYSTEM',
+              scope: state.cliScope,
               summary: 'YXB // CMD stream buffer cleared.',
             },
           ],
@@ -964,80 +1128,140 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               id: `log-${Date.now()}-h`,
               timestamp: nowTimeStr(),
               type: 'TOOL_CALL',
-              toolName: 'HelpManual',
-              summary: 'Available CLI commands: /projects, /protocol, /stats, /add <title>, /reset, /clear',
-              detail: 'Global Vim Keybindings: [p] Browse Projects | [g] Agent Protocol | [j/k] Nav | [h/l] Panels | [J/K] Priority | [a/d/e] CRUD | [m] Milestone | [/] Regex | [t/c] Mode',
+              scope: state.cliScope,
+              toolName: 'YxbCliManual',
+              summary:
+                'Scoped CLI Commands: status [-g] | tree | cd <repo> | add <title> | sub <id> <title> | done <id> | sync | clear',
+              detail:
+                'Terminal Binary: ~/.local/bin/yxb (auto-detects current ~/Documents/Github/<repo> from CWD and syncs <repo>/TASKS.md)',
             },
           ],
         };
       }
 
-      if (lower === 'projects' || lower === '/projects') {
+      if (lower.startsWith('cd ') || lower.startsWith('/cd ')) {
+        const targetQuery = cleaned.replace(/^\/?cd\s+/i, '').trim().toLowerCase();
+        const found = state.projects.find(
+          (p) =>
+            p.code.toLowerCase() === targetQuery ||
+            p.id.toLowerCase() === targetQuery ||
+            p.name.toLowerCase().includes(targetQuery) ||
+            p.localPath.toLowerCase().includes(targetQuery)
+        );
+        if (found) {
+          const switched = scheduleReducer(
+            { ...state, cliLogs: withCmdLog },
+            { type: 'SELECT_PROJECT_CATEGORY', projectId: found.id, categoryId: 'ALL' }
+          );
+          return {
+            ...switched,
+            cliLogs: appendLog(switched, {
+              type: 'SYSTEM',
+              scope: 'LOCAL',
+              projectCode: found.code,
+              summary: `Switched local CWD scope to ${found.code} (${found.localPath})`,
+              detail: `git branch: ${found.gitBranch ?? 'main'} | last commit: "${found.lastCommit ?? 'n/a'}"`,
+            }),
+          };
+        }
+      }
+
+      if (lower === 'status' || lower === '/status' || lower === 'tree' || lower === '/tree' || lower === 'status -g') {
+        const isGlobal = state.cliScope === 'GLOBAL' || lower.includes('-g');
+        if (isGlobal) {
+          const summaryLines = state.projects
+            .map((p) => {
+              const pTasks = Object.values(state.tasks).filter((t) => t.projectId === p.id);
+              const done = pTasks.filter((t) => t.status === 'COMPLETED').length;
+              return `${p.code} [${done}/${pTasks.length}] (${p.gitBranch ?? 'main'})`;
+            })
+            .join(' │ ');
+          return {
+            ...state,
+            cliLogs: [
+              ...withCmdLog,
+              {
+                id: `log-${Date.now()}-st`,
+                timestamp: nowTimeStr(),
+                type: 'TOOL_CALL',
+                scope: 'GLOBAL',
+                toolName: 'GlobalWorkspaceStatus',
+                summary: `GLOBAL SCOPE (${state.projects.length} repos in ~/Documents/Github):`,
+                detail: summaryLines,
+              },
+            ],
+          };
+        }
+
+        const pTasks = Object.values(state.tasks).filter(
+          (t) => t.projectId === state.selectedProjectId
+        );
+        const done = pTasks.filter((t) => t.status === 'COMPLETED').length;
+        const treeLines = pTasks
+          .map((t) => `${'  '.repeat(t.depth)}[L${t.depth}] ${t.id}: ${t.title} (${t.status})`)
+          .join(' || ');
+
         return {
           ...state,
           cliLogs: [
             ...withCmdLog,
             {
-              id: `log-${Date.now()}-p`,
+              id: `log-${Date.now()}-loc`,
               timestamp: nowTimeStr(),
               type: 'TOOL_CALL',
-              toolName: 'ListWorkspaceRepos',
-              summary: `${state.projects.length} repositories registered in ~/Documents/Github:`,
-              detail: state.projects.map((p) => `${p.code} (${p.localPath})`).join(' | '),
+              scope: 'LOCAL',
+              projectCode: activeProj?.code,
+              toolName: 'LocalRepoStatus',
+              summary: `LOCAL SCOPE [${activeProj?.code}] ${activeProj?.localPath} — ${done}/${pTasks.length} completed | branch: ${activeProj?.gitBranch ?? 'main'}`,
+              detail: treeLines,
             },
           ],
         };
       }
 
-      if (lower === 'protocol' || lower === '/protocol') {
-        return {
-          ...state,
-          agentProtocolOpen: true,
-          inputMode: 'AGENT_PROTOCOL',
-          cliLogs: withCmdLog,
-        };
-      }
-
-      if (lower === 'stats' || lower === '/stats') {
-        const all = Object.values(state.tasks);
-        const done = all.filter((t) => t.status === 'COMPLETED').length;
-        const inProg = all.filter((t) => t.status === 'IN_PROGRESS').length;
-        const blocked = all.filter((t) => t.status === 'BLOCKED').length;
-        const milestones = all.filter((t) => t.isMilestone).length;
-        return {
-          ...state,
-          cliLogs: [
-            ...withCmdLog,
-            {
-              id: `log-${Date.now()}-s`,
-              timestamp: nowTimeStr(),
-              type: 'TOOL_CALL',
-              toolName: 'TelemetryAudit',
-              summary: `Repos: ${state.projects.length} | Total Tasks: ${all.length} | Completed: ${done} | In-Progress: ${inProg} | Blocked: ${blocked} | Milestones: ${milestones}`,
-              detail: `Active Project: ${state.selectedProjectId} | Active Sort: ${state.sortBy}`,
-            },
-          ],
-        };
-      }
-
-      if (lower.startsWith('/add ') || lower.startsWith('add ')) {
-        const title = raw.replace(/^\/?add\s+/i, '').trim();
+      if (lower.startsWith('add ') || lower.startsWith('/add ')) {
+        const title = cleaned.replace(/^\/?add\s+/i, '').trim();
         if (title) {
           return scheduleReducer(
             { ...state, cliLogs: withCmdLog },
             {
-              type: 'ADD_TASK_INLINE',
+              type: 'ADD_TASK_PANEL3',
               title,
               priority: 'HIGH',
-              dueDate: '2026-11-08',
-              asSubtask: false,
+              dueDate: '2026-11-10',
+              mode: 'ROOT',
             }
           );
         }
       }
 
-      if (lower === '/reset' || lower === 'reset') {
-        return createInitialSeedState();
+      if (lower.startsWith('sub ') || lower.startsWith('/sub ')) {
+        const parts = cleaned.replace(/^\/?sub\s+/i, '').trim().split(/\s+/);
+        const parentId = parts[0];
+        const title = parts.slice(1).join(' ');
+        if (parentId && title && state.tasks[parentId]) {
+          return scheduleReducer(
+            { ...state, cliLogs: withCmdLog },
+            {
+              type: 'ADD_TASK_PANEL3',
+              title,
+              priority: 'HIGH',
+              dueDate: state.tasks[parentId].dueDate,
+              mode: 'SUBTASK',
+              targetParentId: parentId,
+            }
+          );
+        }
+      }
+
+      if (lower.startsWith('done ') || lower.startsWith('/done ')) {
+        const taskId = cleaned.replace(/^\/?done\s+/i, '').trim();
+        if (state.tasks[taskId]) {
+          return scheduleReducer(
+            { ...state, cliLogs: withCmdLog },
+            { type: 'SET_TASK_STATUS', taskId, status: 'COMPLETED' }
+          );
+        }
       }
 
       return {
@@ -1048,7 +1272,9 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
             id: `log-${Date.now()}-r`,
             timestamp: nowTimeStr(),
             type: 'SYSTEM',
-            summary: `Executed instruction "${raw}" — 0 errors. Type /help or /projects for built-in YXB // CMD commands.`,
+            scope: state.cliScope,
+            projectCode: activeProj?.code,
+            summary: `Executed "${raw}" in ${state.cliScope} scope. Try: status, status -g, cd <repo>, add <title>, sub <id> <title>, done <id>`,
           },
         ],
       };

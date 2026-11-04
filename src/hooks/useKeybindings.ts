@@ -17,7 +17,6 @@ export function useKeybindings(
           target.tagName === 'SELECT' ||
           target.isContentEditable);
 
-      // Escape always returns to NORMAL mode and closes modals/dropdowns
       if (e.key === 'Escape') {
         e.preventDefault();
         if (target && typeof target.blur === 'function') {
@@ -86,23 +85,31 @@ export function useKeybindings(
           break;
         }
 
+        case 's': {
+          e.preventDefault();
+          dispatch({ type: 'TOGGLE_CLOUD_SYNC' });
+          break;
+        }
+
         case 'a': {
           e.preventDefault();
-          if (state.activeMode !== 'SCHEDULE') {
-            dispatch({ type: 'SET_WORKSPACE_MODE', mode: 'SCHEDULE', keyHint: 'a' });
-          }
-          dispatch({ type: 'SET_INPUT_MODE', mode: 'INLINE_ADD', keyHint: 'a' });
+          dispatch({
+            type: 'FOCUS_PANEL3_COMPOSER',
+            mode: state.selectedTaskId ? 'SUBTASK' : 'ROOT',
+            targetParentId: state.selectedTaskId,
+          });
           break;
         }
 
         case 'd': {
           e.preventDefault();
-          dispatch({ type: 'DELETE_SELECTED_TASK' });
+          dispatch({ type: 'DELETE_TASK_BY_ID' });
           break;
         }
 
         case 'e': {
           e.preventDefault();
+          dispatch({ type: 'SET_PANEL_FOCUS', panel: 'RIGHT' });
           dispatch({ type: 'SET_INPUT_MODE', mode: 'INLINE_EDIT', keyHint: 'e' });
           break;
         }
@@ -162,5 +169,5 @@ export function useKeybindings(
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.inputMode, state.activeMode, dispatch]);
+  }, [state.inputMode, state.activeMode, state.selectedTaskId, dispatch]);
 }
