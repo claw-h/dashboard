@@ -19,10 +19,11 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
 }) => {
   const [commandInput, setCommandInput] = useState('');
   const [history, setHistory] = useState<string[]>([
+    '-?',
     'yxb status',
     'yxb status -g',
     'cd portyxb',
-    'yxb help',
+    'yxb -help',
   ]);
   const [historyIdx, setHistoryIdx] = useState<number>(-1);
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState(0);
@@ -92,6 +93,14 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
 
     const baseCommands: CliSuggestion[] = [
       {
+        cmd: '-?',
+        desc: 'Visual Architecture & Complete Feature Manual (also -help / --help)',
+      },
+      {
+        cmd: '-help',
+        desc: 'Display full YXB // CMD CLI, 3-Panel Topology & Keybinding Manual',
+      },
+      {
         cmd: 'status',
         desc: `Print L0..L3 task tree & Git status for ${activeProject?.code ?? 'current repo'}`,
       },
@@ -114,6 +123,10 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
       {
         cmd: 'done ',
         desc: 'Mark a task ID as COMPLETED',
+      },
+      {
+        cmd: 'sync',
+        desc: 'Open Phone/GitHub Cloud Sync & TASKS.md status',
       },
       {
         cmd: 'protocol',
@@ -230,6 +243,14 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
 
         {/* One-Click Quick Command Pills */}
         <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+          <button
+            type="button"
+            onClick={() => executeCommand('-?')}
+            className="px-2 py-0.5 bg-[#E05C36]/15 border border-[#E05C36] text-[#E05C36] hover:bg-[#E05C36] hover:text-[#0F0F11] font-bold transition-colors"
+            title="Print comprehensive visual architecture & CLI manual (-? / -help)"
+          >
+            [-?] -help
+          </button>
           <button
             type="button"
             onClick={() => executeCommand('status')}
@@ -408,7 +429,7 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
             onBlur={() => dispatch({ type: 'SET_INPUT_MODE', mode: 'NORMAL' })}
             onChange={(e) => setCommandInput(e.target.value)}
             onKeyDown={handleInputKeyDown}
-            placeholder="Type command (Tab to complete, ↑/↓ history, Ctrl+L clear)..."
+            placeholder="Type -? or -help for visual manual, Tab to complete, ↑/↓ history, Ctrl+L clear..."
             className="w-full bg-[#0F0F11] border border-zinc-700 focus:border-[#E05C36] px-2.5 py-1.5 text-xs text-[#F4F4F5] placeholder-zinc-600 outline-none font-mono"
           />
         </div>

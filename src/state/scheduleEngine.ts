@@ -1119,7 +1119,81 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         };
       }
 
-      if (lower === 'help' || lower === '/help') {
+      if (
+        lower === '-?' ||
+        lower === '?' ||
+        lower === '/?' ||
+        lower === '-help' ||
+        lower === '--help' ||
+        lower === '-h' ||
+        lower === 'help' ||
+        lower === '/help'
+      ) {
+        const manualVisual = [
+          '╔══════════════════════════════════════════════════════════════════════════════════════════╗',
+          '║  ◈ YXB // CMD — GLOBAL & LOCAL SCOPED AGENT COMMAND CENTER (v3.2 VISUAL MANUAL)          ║',
+          '║  Triggers:  yxb -?   │   yxb -help   │   yxb --help   │   -?   │   -help                 ║',
+          '╚══════════════════════════════════════════════════════════════════════════════════════════╝',
+          '',
+          '┌── 01. SYSTEM ARCHITECTURE & 3-PANEL TOPOLOGY ────────────────────────────────────────────┐',
+          '│                                                                                          │',
+          '│  ┌──────────────────────┐    ┌───────────────────────────┐    ┌────────────────────────┐ │',
+          '│  │ 01. WORKSPACE TREE   │◄──►│ 02. SCHEDULE / CLI STREAM │◄──►│ 03. TASK COMPOSER +    │ │',
+          '│  │ • 11 GitHub Repos    │    │ • L0..L3 Hierarchy Engine │    │     SUBTASK INSPECTOR  │ │',
+          '│  │ • Category Filters   │    │ • Scoped Interactive REPL │    │ • Root/Subtask Builder │ │',
+          '│  │ • [p] Mega-Dropdown  │    │ • Regex & Priority Engine │    │ • 1-Click Status/Prio  │ │',
+          '│  └──────────────────────┘    └─────────────▲─────────────┘    └───────────▲────────────┘ │',
+          '│                                            │                              │              │',
+          '│       ~/.local/bin/yxb (CWD Auto-Detect) ──┴──► <repo>/TASKS.md ◄─────────┘              │',
+          '│       GitHub REST API (claw-h/dashboard) ◄────► Bidirectional Phone & Desktop Sync       │',
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘',
+          '',
+          '┌── 02. SCOPED CLI COMMANDS (TERMINAL `yxb <cmd>` & WEB REPL) ─────────────────────────────┐',
+          '│  HELP & DIAGNOSTICS                                                                      │',
+          '│    -?  |  -help  |  --help        Display this visual architecture & command manual      │',
+          '│    status  |  tree                Print L0->L1->L2->L3 task tree for current repo scope  │',
+          '│    status -g  |  list             Global telemetry & progress table across all 11 repos  │',
+          '│    cd <repo-code>                 Switch active local repository scope (e.g. cd portyxb) │',
+          '│                                                                                          │',
+          '│  HIERARCHICAL TASK MUTATION (L0 ROOT -> L1 -> L2 -> L3 SUBTASKS)                         │',
+          '│    add "<title>"                  Create new L0 Root Task in active project              │',
+          '│    sub <task-id> "<title>"        Spawn nested child subtask (L1..L3) under <task-id>    │',
+          '│    done <task-id>                 Mark task as COMPLETED [✓]                             │',
+          '│    start <task-id>                Mark task as IN_PROGRESS [~]                           │',
+          '│    block <task-id>                Mark task as BLOCKED [!]                               │',
+          '│    log "<summary>"                Append agent telemetry entry to CLI Stream             │',
+          '│                                                                                          │',
+          '│  BIDIRECTIONAL FILESYSTEM & PHONE CLOUD SYNC                                             │',
+          '│    sync                           Regenerate TASKS.md across all 11 local repositories   │',
+          '│    protocol                       Open Global & Local Agent Protocol modal ([g])         │',
+          '│    clear                          Clear CLI stream buffer (or press Ctrl+L)              │',
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘',
+          '',
+          '┌── 03. PANEL 03 UNIFIED TASK & SUBTASK COMPOSER + LIVE INSPECTOR ─────────────────────────┐',
+          '│  • Press [a] anywhere to focus the Panel 03 Unified Composer without blocking popups.    │',
+          '│  • Toggle between [+ ROOT TASK (L0)] and [↳ SUBTASK OF SELECTED (L1..L3)] in 1 click.    │',
+          '│  • Click [+ Sub] on any row in the Subtask Tree Builder to attach deeper nested child    │',
+          '│    nodes up to L3, or click status/priority badges in Panel 03 to mutate immediately.    │',
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘',
+          '',
+          '┌── 04. SCHOLARLY & VIM-INSPIRED KEYBINDING MATRIX ────────────────────────────────────────┐',
+          '│  NAVIGATION & FOCUS                       TASK & WORKSPACE ACTIONS                       │',
+          '│    [j] / [k]   Move cursor Down / Up        [a]       Focus Panel 03 Task/Subtask Add    │',
+          '│    [h]         Focus / Collapse Panel 01    [Space]   Cycle Status (TODO->PROG->DONE)    │',
+          '│    [l]         Focus / Expand Panel 03      [e]       Focus Panel 03 Inline Title Edit   │',
+          '│    [Tab]       Cycle Panel 01 -> 02 -> 03   [d]       Delete selected task & subtree     │',
+          '│    [t] / [c]   Schedule Mode / CLI Mode     [m]       Toggle Milestone ◆ flag            │',
+          '│    [i] / [/]   Quick Filter / Regex Search  [J] / [K] Reorder task priority Down / Up    │',
+          '│    [p]         Browse 11 Projects Menu      [s] / [g] Cloud Sync Modal / Agent Protocol  │',
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘',
+          '',
+          '┌── 05. SIGNATURE VISUAL TELEMETRY (DIAMOND BEZIER PRELOADER & ~30S PULSE) ────────────────┐',
+          '│  • Boot Preloader : Interpolated cubic-bezier(0.22, 1, 0.36, 1) diamond fade-in/out.     │',
+          '│  • Header Emblem  : ◈ next to YXB // CMD triggers a randomized ~24s-36s incremental      │',
+          '│                     multi-wave glow + scale pulse (or click ◈ anytime to test pulse).    │',
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘',
+        ].join('\n');
+
         return {
           ...state,
           cliLogs: [
@@ -1129,11 +1203,50 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               timestamp: nowTimeStr(),
               type: 'TOOL_CALL',
               scope: state.cliScope,
-              toolName: 'YxbCliManual',
+              projectCode: activeProj?.code,
+              toolName: 'YxbVisualManual (-?)',
               summary:
-                'Scoped CLI Commands: status [-g] | tree | cd <repo> | add <title> | sub <id> <title> | done <id> | sync | clear',
-              detail:
-                'Terminal Binary: ~/.local/bin/yxb (auto-detects current ~/Documents/Github/<repo> from CWD and syncs <repo>/TASKS.md)',
+                'YXB // CMD — Comprehensive Visual Manual & Architecture Reference (-? / -help)',
+              detail: manualVisual,
+              accent: true,
+            },
+          ],
+          statusMessage: 'Displayed YXB // CMD Comprehensive Visual Manual (-? / -help)',
+        };
+      }
+
+      if (lower === 'protocol' || lower === '/protocol') {
+        return {
+          ...state,
+          agentProtocolOpen: true,
+          cliLogs: [
+            ...withCmdLog,
+            {
+              id: `log-${Date.now()}-proto`,
+              timestamp: nowTimeStr(),
+              type: 'SYSTEM',
+              scope: state.cliScope,
+              projectCode: activeProj?.code,
+              summary: 'Opened Global & Local Agent Initialization Protocol modal ([g]).',
+            },
+          ],
+        };
+      }
+
+      if (lower === 'sync' || lower === '/sync') {
+        return {
+          ...state,
+          cloudSyncOpen: true,
+          cliLogs: [
+            ...withCmdLog,
+            {
+              id: `log-${Date.now()}-sync`,
+              timestamp: nowTimeStr(),
+              type: 'TOOL_CALL',
+              scope: 'GLOBAL',
+              toolName: 'BidirectionalSync',
+              summary:
+                'Opened Cloud & Phone GitHub Sync inspector ([s]). Terminal `yxb sync` also writes TASKS.md to all 11 repos.',
             },
           ],
         };
@@ -1285,6 +1398,26 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         }
       }
 
+      if (lower.startsWith('start ') || lower.startsWith('/start ')) {
+        const taskId = cleaned.replace(/^\/?start\s+/i, '').trim();
+        if (state.tasks[taskId]) {
+          return scheduleReducer(
+            { ...state, cliLogs: withCmdLog },
+            { type: 'SET_TASK_STATUS', taskId, status: 'IN_PROGRESS' }
+          );
+        }
+      }
+
+      if (lower.startsWith('block ') || lower.startsWith('/block ')) {
+        const taskId = cleaned.replace(/^\/?block\s+/i, '').trim();
+        if (state.tasks[taskId]) {
+          return scheduleReducer(
+            { ...state, cliLogs: withCmdLog },
+            { type: 'SET_TASK_STATUS', taskId, status: 'BLOCKED' }
+          );
+        }
+      }
+
       return {
         ...state,
         cliLogs: [
@@ -1295,7 +1428,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
             type: 'SYSTEM',
             scope: state.cliScope,
             projectCode: activeProj?.code,
-            summary: `Executed "${raw}" in ${state.cliScope} scope. Try: status, status -g, cd <repo>, add <title>, sub <id> <title>, done <id>`,
+            summary: `Executed "${raw}" in ${state.cliScope} scope. Type -? or -help for the full visual manual.`,
           },
         ],
       };

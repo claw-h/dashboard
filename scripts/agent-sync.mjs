@@ -2,15 +2,8 @@
 /**
  * YXB // CMD — Global & Local CWD-Scoped CLI (`yxb` / `scripts/agent-sync.mjs`)
  *
- * Capabilities:
- *   1. Automatic Local CWD Scope Detection:
- *      Running `yxb` inside `~/Documents/Github/portyxb` automatically scopes to `PORTYXB`.
- *   2. Global Workspace Scan (`yxb -g` or `yxb sync`):
- *      Scans live Git status (branch, uncommitted files, latest commit) across all 11
- *      repositories in `~/Documents/Github/*`, updates `src/data/workspaceRegistry.json`,
- *      and writes an agent-readable `TASKS.md` blueprint into every repository root.
- *   3. Bidirectional Phone/Cloud Sync (`yxb pull` / `yxb push`):
- *      Pulls or pushes `workspaceRegistry.json` commits with `origin/main` on GitHub.
+ * Trigger comprehensive visual help manual with:
+ *   yxb -?   |   yxb -help   |   yxb --help   |   yxb help
  */
 
 import { execSync } from 'node:child_process';
@@ -24,6 +17,21 @@ const DASHBOARD_ROOT = path.resolve(__dirname, '..');
 const REGISTRY_PATH = path.resolve(DASHBOARD_ROOT, 'src/data/workspaceRegistry.json');
 const HOME_DIR = os.homedir();
 
+// ANSI Color Codes for rich terminal visuals
+const C = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  clay: '\x1b[38;2;224;92;54m',
+  orange: '\x1b[38;2;234;88;12m',
+  white: '\x1b[38;2;244;244;245m',
+  muted: '\x1b[38;2;161;161;170m',
+  zinc: '\x1b[38;2;113;113;122m',
+  green: '\x1b[38;2;52;211;153m',
+  cyan: '\x1b[38;2;56;189;248m',
+  amber: '\x1b[38;2;251;191;36m',
+};
+
 function expandTilde(p) {
   if (!p) return '';
   if (p.startsWith('~/')) return path.join(HOME_DIR, p.slice(2));
@@ -34,7 +42,15 @@ function parseArgs(argv) {
   const args = { _: [] };
   for (let i = 0; i < argv.length; i++) {
     const token = argv[i];
-    if (token === '-g') {
+    if (
+      token === '-?' ||
+      token === '?' ||
+      token === '-help' ||
+      token === '--help' ||
+      token === '-h'
+    ) {
+      args.help = true;
+    } else if (token === '-g') {
       args.global = true;
     } else if (token === '-m') {
       args.milestone = true;
@@ -70,9 +86,6 @@ function nowTimeStr() {
   return new Date().toTimeString().slice(0, 8);
 }
 
-/**
- * Detects which project in `workspaceRegistry.json` corresponds to `process.cwd()`
- */
 function resolveScopedProject(registry, explicitProjectArg) {
   if (explicitProjectArg) {
     const q = String(explicitProjectArg).toLowerCase();
@@ -87,7 +100,6 @@ function resolveScopedProject(registry, explicitProjectArg) {
   }
 
   const cwd = process.cwd().toLowerCase();
-  // Sort by longest path first so nested paths match accurately
   const sorted = [...registry.projects].sort(
     (a, b) => expandTilde(b.localPath).length - expandTilde(a.localPath).length
   );
@@ -100,9 +112,6 @@ function resolveScopedProject(registry, explicitProjectArg) {
   return null;
 }
 
-/**
- * Probes live Git branch, dirty file count, and last commit subject for a local repo path
- */
 function probeGitStatus(localPath) {
   const abs = expandTilde(localPath);
   if (!fs.existsSync(abs)) {
@@ -145,10 +154,6 @@ function probeGitStatus(localPath) {
   }
 }
 
-/**
- * Writes an up-to-date `TASKS.md` file inside each repository's directory so any
- * AI agent opening that repository immediately sees its hierarchical task breakdown.
- */
 function writeProjectTasksMarkdown(registry, project) {
   const absDir = expandTilde(project.localPath);
   if (!fs.existsSync(absDir)) return false;
@@ -169,6 +174,7 @@ function writeProjectTasksMarkdown(registry, project) {
     ``,
     `## Quick Agent CLI Commands (Scoped to this Repository)`,
     `\`\`\`bash`,
+    `yxb -?                                      # Launch visual YXB // CMD manual`,
     `yxb status                                  # View live L0..L3 task tree for ${project.code}`,
     `yxb add "New root task title" -p HIGH -m    # Add L0 parent task`,
     `yxb sub <parent-task-id> "Subtask title"    # Add nested subtask (L1..L3)`,
@@ -249,10 +255,10 @@ function printProjectTree(registry, proj) {
   const pct = projTasks.length > 0 ? Math.round((done / projTasks.length) * 100) : 0;
 
   console.log(
-    `\n◈ [${proj.code}] ${proj.name} (${proj.localPath}) — ${pct}% (${done}/${projTasks.length} tasks)`
+    `\n${C.clay}◈ [${proj.code}]${C.reset} ${C.bold}${proj.name}${C.reset} ${C.muted}(${proj.localPath})${C.reset} — ${C.green}${pct}% (${done}/${projTasks.length} tasks)${C.reset}`
   );
   console.log(
-    `  git: branch=${proj.gitBranch || 'main'} | dirty=${proj.gitDirtyCount ?? 0} | commit="${proj.lastCommit || 'n/a'}"`
+    `  ${C.zinc}git: branch=${proj.gitBranch || 'main'} | dirty=${proj.gitDirtyCount ?? 0} | commit="${proj.lastCommit || 'n/a'}"${C.reset}`
   );
 
   const printChildren = (parentId, prefix) => {
@@ -264,15 +270,15 @@ function printProjectTree(registry, proj) {
       const branch = isLast ? '└─' : '├─';
       const glyph =
         node.status === 'COMPLETED'
-          ? '[✓]'
+          ? `${C.green}[✓]${C.reset}`
           : node.status === 'IN_PROGRESS'
-          ? '[~]'
+          ? `${C.clay}[~]${C.reset}`
           : node.status === 'BLOCKED'
-          ? '[!]'
-          : '[ ]';
-      const ms = node.isMilestone ? ' ◆' : '';
+          ? `\x1b[31m[!]${C.reset}`
+          : `${C.zinc}[ ]${C.reset}`;
+      const ms = node.isMilestone ? ` ${C.clay}◆ MILESTONE${C.reset}` : '';
       console.log(
-        `${prefix}${branch} ${glyph} [L${node.depth}] (${node.id}) ${node.title} [${node.priority}]${ms}`
+        `${C.zinc}${prefix}${branch}${C.reset} ${glyph} ${C.muted}[L${node.depth}]${C.reset} ${C.cyan}(${node.id})${C.reset} ${C.white}${node.title}${C.reset} ${C.amber}[${node.priority}]${C.reset}${ms}`
       );
       printChildren(node.id, prefix + (isLast ? '   ' : '│  '));
     });
@@ -281,10 +287,84 @@ function printProjectTree(registry, proj) {
   printChildren(null, '  ');
 }
 
+function printComprehensiveVisualHelp(registry, scopedProj) {
+  const scopeLabel = scopedProj
+    ? `LOCAL REPO -> ${scopedProj.code} (${scopedProj.localPath})`
+    : `GLOBAL WORKSPACE -> ~/Documents/Github/* (${registry.projects.length} Repos)`;
+
+  console.log(`
+${C.clay}╔══════════════════════════════════════════════════════════════════════════════════════════╗${C.reset}
+${C.clay}║${C.reset}  ${C.clay}◈${C.reset}  ${C.bold}${C.white}YXB // CMD v3.0 — SOVEREIGN AGENTIC COMMAND CENTER & HIERARCHICAL SCHEDULER${C.reset}          ${C.clay}║${C.reset}
+${C.clay}║${C.reset}     ${C.muted}Comprehensive Visual CLI & TUI Architecture Manual  (Triggers: -? | -help | help)${C.reset}    ${C.clay}║${C.reset}
+${C.clay}╚══════════════════════════════════════════════════════════════════════════════════════════╝${C.reset}
+
+${C.bold}${C.white}┌─ 01. ACTIVE EXECUTION CONTEXT & TOPOLOGY ────────────────────────────────────────────────┐${C.reset}
+${C.zinc}│${C.reset}  ${C.muted}Active CWD Scope :${C.reset} ${C.clay}${C.bold}${scopeLabel}${C.reset}
+${C.zinc}│${C.reset}  ${C.muted}Global CLI Binary:${C.reset} ${C.cyan}~/.local/bin/yxb${C.reset} ${C.zinc}(Auto-scopes via process.cwd() inside any repo)${C.reset}
+${C.zinc}│${C.reset}  ${C.muted}Canonical Ledger :${C.reset} ${C.cyan}~/Documents/Github/dashboard/src/data/workspaceRegistry.json${C.reset}
+${C.zinc}│${C.reset}  ${C.muted}Per-Repo Mirrors :${C.reset} ${C.green}~/Documents/Github/<repo>/TASKS.md${C.reset} ${C.zinc}(11/11 auto-generated blueprints)${C.reset}
+${C.zinc}│${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}┌────────────────────┐    ┌────────────────────────────────┐    ┌──────────────────────┐${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}│  PANEL 01 [h / p]  │    │      PANEL 02 [t / c / /]      │    │   PANEL 03 [a / l]   │${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}│  Workspace Tree &  │───▶│  Schedule DAG (L0→L1→L2→L3)    │───▶│  Unified Task/Subtask│${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}│  Status Facets     │    │  OR Interactive yxb CLI Stream │    │  Composer & Inspector│${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}└────────────────────┘    └────────────────────────────────┘    └──────────────────────┘${C.reset}
+${C.bold}${C.white}└──────────────────────────────────────────────────────────────────────────────────────────┘${C.reset}
+
+${C.bold}${C.white}┌─ 02. CLI COMMAND REFERENCE (LOCAL CWD-SCOPED & GLOBAL MULTI-REPO) ───────────────────────┐${C.reset}
+${C.zinc}│${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}${C.bold}A. Inspection & Telemetry${C.reset}
+${C.zinc}│${C.reset}    ${C.cyan}yxb -?${C.reset} ${C.zinc}|${C.reset} ${C.cyan}yxb -help${C.reset}                Display this comprehensive visual architecture manual
+${C.zinc}│${C.reset}    ${C.cyan}yxb status${C.reset} ${C.zinc}|${C.reset} ${C.cyan}yxb tree${C.reset}             Print current repo's Git telemetry & L0..L3 task tree
+${C.zinc}│${C.reset}    ${C.cyan}yxb status -g${C.reset}                     Global audit across all 11 ~/Documents/Github repos
+${C.zinc}│${C.reset}    ${C.cyan}cd <repo-code>${C.reset}                    (Web CLI) Switch local scope (e.g. ${C.amber}cd portyxb${C.reset}, ${C.amber}cd aos-v3${C.reset})
+${C.zinc}│${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}${C.bold}B. Hierarchical Task & Subtask Mutation (L0 -> L1 -> L2 -> L3)${C.reset}
+${C.zinc}│${C.reset}    ${C.cyan}yxb add "<title>" [-p HIGH] [-m]${C.reset}  Create L0 Root Task in current repo (${C.amber}-m${C.reset} marks ◆ Milestone)
+${C.zinc}│${C.reset}    ${C.cyan}yxb sub <parent-id> "<title>"${C.reset}     Spawn nested L1..L3 Subtask under <parent-id>
+${C.zinc}│${C.reset}    ${C.cyan}yxb done <task-id>${C.reset}                Mark task ${C.green}[✓] COMPLETED${C.reset} & regenerate <repo>/TASKS.md
+${C.zinc}│${C.reset}    ${C.cyan}yxb start <task-id>${C.reset}               Mark task ${C.clay}[~] IN_PROGRESS${C.reset}
+${C.zinc}│${C.reset}    ${C.cyan}yxb block <task-id>${C.reset}               Mark task \x1b[31m[!] BLOCKED${C.reset}
+${C.zinc}│${C.reset}    ${C.cyan}yxb log "<summary>"${C.reset}               Append architectural diff log to the YXB // CMD stream
+${C.zinc}│${C.reset}
+${C.zinc}│${C.reset}  ${C.clay}${C.bold}C. Project Registration & Bidirectional Phone / GitHub Cloud Sync${C.reset}
+${C.zinc}│${C.reset}    ${C.cyan}yxb init-project --code "X" ...${C.reset}   Register a new ~/Documents/Github repo on the dashboard
+${C.zinc}│${C.reset}    ${C.cyan}yxb sync${C.reset}                          Scan live Git branches & write TASKS.md to all 11 repos
+${C.zinc}│${C.reset}    ${C.cyan}yxb pull${C.reset}                          Pull remote/phone edits from GitHub (claw-h/dashboard)
+${C.zinc}│${C.reset}    ${C.cyan}yxb push${C.reset}                          Commit & push local registry state to GitHub
+${C.bold}${C.white}└──────────────────────────────────────────────────────────────────────────────────────────┘${C.reset}
+
+${C.bold}${C.white}┌─ 03. SCHOLARLY & VIM-INSPIRED KEYBINDING MATRIX (WEB DASHBOARD) ─────────────────────────┐${C.reset}
+${C.zinc}│${C.reset}  ${C.amber}[j / k]${C.reset}   Move cursor Down / Up          ${C.amber}[a]${C.reset}       Focus Panel 3 Task/Subtask Composer
+${C.zinc}│${C.reset}  ${C.amber}[h / l]${C.reset}   Focus/Collapse Left / Right    ${C.amber}[e]${C.reset}       Focus Panel 3 Live Metadata Editor
+${C.zinc}│${C.reset}  ${C.amber}[J / K]${C.reset}   Shift task Down / Up priority  ${C.amber}[d]${C.reset}       Delete selected task & subtree
+${C.zinc}│${C.reset}  ${C.amber}[p]${C.reset}       Open Browse Project (11 Repos) ${C.amber}[m]${C.reset}       Toggle ◆ MILESTONE flag on node
+${C.zinc}│${C.reset}  ${C.amber}[g]${C.reset}       Open Agent CLI Protocol modal  ${C.amber}[s]${C.reset}       Open ☁ Phone & GitHub Sync Bridge
+${C.zinc}│${C.reset}  ${C.amber}[t / c]${C.reset}   Schedule Mode / CLI Mode       ${C.amber}[/ / i]${C.reset}   Global Regex Search / Keyword Filter
+${C.zinc}│${C.reset}  ${C.amber}[Space]${C.reset}   Cycle task status              ${C.amber}[Tab]${C.reset}     Cycle panel focus / Autocomplete CLI
+${C.bold}${C.white}└──────────────────────────────────────────────────────────────────────────────────────────┘${C.reset}
+`);
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
-  const cmd = args._[0] || (args.verify ? 'verify' : 'status');
+  const rawFirst = (args._[0] || '').toLowerCase();
   const registry = loadRegistry();
+
+  if (
+    args.help ||
+    rawFirst === 'help' ||
+    rawFirst === '-help' ||
+    rawFirst === '--help' ||
+    rawFirst === '-?' ||
+    rawFirst === '?'
+  ) {
+    const scoped = resolveScopedProject(registry, args.project);
+    printComprehensiveVisualHelp(registry, scoped);
+    return;
+  }
+
+  const cmd = rawFirst || (args.verify ? 'verify' : 'status');
 
   if (cmd === 'verify' || args.verify) {
     const synced = syncAllRepos(registry);
@@ -458,7 +538,9 @@ function main() {
     const status = (args.status || 'IN_PROGRESS').toUpperCase();
     const isMilestone = Boolean(args.milestone);
     const now = new Date().toISOString();
-    const id = args.id || `task-${scoped.code.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-4)}`;
+    const id =
+      args.id ||
+      `task-${scoped.code.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-4)}`;
 
     registry.tasks.push({
       id,
@@ -473,7 +555,8 @@ function main() {
       dueDate: args.due || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
       isMilestone,
       estimatedMinutes: Number(args.est || 45),
-      manualOrder: registry.tasks.filter((t) => t.projectId === scoped.id && t.parentId === parentId).length,
+      manualOrder: registry.tasks.filter((t) => t.projectId === scoped.id && t.parentId === parentId)
+        .length,
       expanded: true,
       createdAt: now,
       updatedAt: now,
@@ -509,7 +592,8 @@ function main() {
       console.error(`Error: Parent task "${parentId}" not found.`);
       process.exit(1);
     }
-    const proj = registry.projects.find((p) => p.id === parentTask.projectId) || registry.projects[0];
+    const proj =
+      registry.projects.find((p) => p.id === parentTask.projectId) || registry.projects[0];
     const actualParentId = parentTask.depth < 3 ? parentTask.id : parentTask.parentId;
     const depth = Math.min(3, parentTask.depth + 1);
     const now = new Date().toISOString();
@@ -535,7 +619,9 @@ function main() {
     });
 
     syncAllRepos(registry);
-    console.log(`[YXB // CMD] Added nested subtask [L${depth}] ${id} under ${parentTask.id}: "${title}"`);
+    console.log(
+      `[YXB // CMD] Added nested subtask [L${depth}] ${id} under ${parentTask.id}: "${title}"`
+    );
     return;
   }
 
@@ -593,16 +679,7 @@ function main() {
     return;
   }
 
-  console.log(`YXB // CMD — Global & Local Scoped CLI
-Usage (auto-detects current repo from CWD, or pass -g for global):
-  yxb status [-g]                            Show live Git & L0..L3 task tree
-  yxb sync                                   Scan Git status & write TASKS.md to all 11 repos
-  yxb add "Task title" [-p HIGH] [-m]        Add L0 Root Task to current repo
-  yxb sub <parent-id> "Subtask title"        Add L1..L3 Subtask under <parent-id>
-  yxb done <task-id>                         Mark task COMPLETED & update TASKS.md
-  yxb start <task-id> | yxb block <task-id>  Mark task IN_PROGRESS or BLOCKED
-  yxb log "Summary of architectural change"  Append telemetry log entry
-  yxb pull | yxb push                        Bidirectional sync with GitHub (phone <-> Mac)`);
+  printComprehensiveVisualHelp(registry, resolveScopedProject(registry, args.project));
 }
 
 main();
