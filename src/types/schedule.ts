@@ -8,13 +8,17 @@ export type ActivePanel = 'LEFT' | 'CENTER' | 'RIGHT';
 
 export type WorkspaceMode = 'SCHEDULE' | 'CLI_STREAM';
 
+export type ProjectLifecycle = 'PRODUCTION' | 'ACTIVE' | 'INCUBATING' | 'ARCHIVED';
+
 export type InputMode =
   | 'NORMAL'
   | 'INLINE_ADD'
   | 'INLINE_EDIT'
   | 'SEARCH_REGEX'
   | 'FILTER_BAR'
-  | 'CLI_INPUT';
+  | 'CLI_INPUT'
+  | 'PROJECT_BROWSER'
+  | 'AGENT_PROTOCOL';
 
 export type StatusFilter = 'ALL' | 'IN_PROGRESS' | 'BLOCKED' | 'COMPLETED' | 'MILESTONES';
 
@@ -23,6 +27,11 @@ export interface Project {
   code: string;
   name: string;
   description: string;
+  localPath: string;
+  repoUrl?: string;
+  stack: string[];
+  lifecycle: ProjectLifecycle;
+  lastAgentSync?: string;
   order: number;
   expanded: boolean;
 }
@@ -72,6 +81,15 @@ export interface CliLogEntry {
   accent?: boolean;
 }
 
+export interface WorkspaceRegistryPayload {
+  schemaVersion: number;
+  updatedAt: string;
+  projects: Project[];
+  categories: Category[];
+  tasks: TaskNode[];
+  cliLogs: CliLogEntry[];
+}
+
 export interface ScheduleState {
   projects: Project[];
   categories: Category[];
@@ -84,6 +102,8 @@ export interface ScheduleState {
   activeMode: WorkspaceMode;
   focusedPanel: ActivePanel;
   inputMode: InputMode;
+  projectBrowserOpen: boolean;
+  agentProtocolOpen: boolean;
   leftPanelCollapsed: boolean;
   rightPanelExpanded: boolean;
   sortBy: SortCriterion;

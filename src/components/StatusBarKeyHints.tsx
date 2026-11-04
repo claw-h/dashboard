@@ -9,17 +9,18 @@ interface StatusBarKeyHintsProps {
 }
 
 const KEY_HINTS = [
+  { key: 'p', label: 'Browse Projects' },
+  { key: 'g', label: 'Agent Protocol' },
   { key: 'j/k', label: 'Up/Down' },
-  { key: 'h/l', label: 'Left/Right Panel' },
-  { key: 'J/K', label: 'Priority Order' },
+  { key: 'h/l', label: 'Left/Right' },
+  { key: 'J/K', label: 'Priority' },
   { key: 'a', label: 'Add Node' },
   { key: 'e', label: 'Edit' },
   { key: 'd', label: 'Delete' },
   { key: 'm', label: 'Milestone' },
   { key: 't/c', label: 'Schedule/CLI' },
-  { key: 'i', label: 'Filter' },
   { key: '/', label: 'Regex' },
-  { key: 'Tab', label: 'Cycle Focus' },
+  { key: 'Tab', label: 'Focus' },
 ];
 
 export const StatusBarKeyHints: React.FC<StatusBarKeyHintsProps> = ({ state }) => {

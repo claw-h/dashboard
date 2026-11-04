@@ -43,7 +43,6 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
         isFocused ? 'tui-box-shadow-active' : ''
       }`}
     >
-      {/* Top Panel Header */}
       <div className="flex flex-col min-h-0 flex-1">
         <div className="h-8 px-3 border-b border-zinc-800 bg-[#18181B] flex items-center justify-between text-[11px]">
           <div className="flex items-center gap-1.5">
@@ -57,7 +56,7 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
               01
             </span>
             <span className="font-semibold tracking-wider text-[#F4F4F5]">
-              PROJECT TREE
+              WORKSPACE TREE ({state.projects.length})
             </span>
           </div>
           <button
@@ -75,8 +74,18 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
 
         {/* Project & Category Tree */}
         <div className="p-2 overflow-y-auto tui-scroll flex-1 space-y-0.5">
-          <div className="text-[10px] uppercase tracking-wider text-zinc-500 px-1.5 py-1">
-            ┌─ Workspace Hierarchy
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-zinc-500 px-1.5 py-1">
+            <span>┌─ ~/Documents/Github</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch({ type: 'TOGGLE_PROJECT_BROWSER' });
+              }}
+              className="text-[#E05C36] hover:underline font-bold"
+            >
+              [p] Browse All
+            </button>
           </div>
 
           {navItems.map((item, idx) => {
@@ -89,9 +98,8 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
 
             if (item.kind === 'PROJECT') {
               return (
-                <button
+                <div
                   key={`proj-${item.projectId}`}
-                  type="button"
                   onClick={() =>
                     dispatch({
                       type: 'SELECT_PROJECT_CATEGORY',
@@ -99,7 +107,7 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
                       categoryId: 'ALL',
                     })
                   }
-                  className={`w-full text-left px-2 py-1.5 text-xs flex items-center justify-between border-l-2 transition-colors ${
+                  className={`w-full text-left px-2 py-1.5 text-xs flex items-center justify-between border-l-2 cursor-pointer transition-colors ${
                     isCursorRow
                       ? 'border-[#E05C36] bg-[#18181B] text-[#F4F4F5]'
                       : isSelectedScope
@@ -108,14 +116,23 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
                   }`}
                 >
                   <div className="flex items-center gap-1.5 truncate">
-                    <span className="text-[#E05C36] font-bold">▾</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch({ type: 'TOGGLE_PROJECT_EXPAND', projectId: item.projectId });
+                      }}
+                      className="text-[#E05C36] font-bold w-3 text-left"
+                    >
+                      {item.expanded ? '▾' : '▸'}
+                    </button>
                     <span className="font-bold text-[#F4F4F5]">{item.code}</span>
                     <span className="text-zinc-500 truncate text-[11px]">{item.label}</span>
                   </div>
                   <span className="text-[10px] px-1.5 py-0.2 bg-zinc-900 border border-zinc-800 text-zinc-400">
                     {item.count}
                   </span>
-                </button>
+                </div>
               );
             }
 
@@ -184,17 +201,17 @@ export const LeftPanelTree: React.FC<LeftPanelTreeProps> = ({ state, dispatch })
       {/* Bottom Storage & Quick Reset Footer */}
       <div className="p-2.5 border-t border-zinc-800 bg-[#18181B]/60 text-[11px] space-y-1.5">
         <div className="flex items-center justify-between text-zinc-400">
-          <span>STORAGE ENGINE</span>
-          <span className="text-emerald-400 font-semibold">● LOCALSTORAGE SYNC</span>
+          <span>AGENT LEDGER</span>
+          <span className="text-emerald-400 font-semibold">● AUTO-SYNCED</span>
         </div>
         <div className="flex items-center justify-between text-[10px] text-zinc-500">
-          <span>MAX SUBTASK DEPTH: 3</span>
+          <span>{state.projects.length} GITHUB REPOS</span>
           <button
             type="button"
             onClick={() => dispatch({ type: 'RESET_SEED_DATA' })}
             className="text-zinc-400 hover:text-[#E05C36] underline"
           >
-            [reset seed]
+            [reload registry]
           </button>
         </div>
       </div>

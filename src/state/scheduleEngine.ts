@@ -4,6 +4,8 @@ import type {
   CliLogEntry,
   InputMode,
   Priority,
+  Project,
+  ProjectLifecycle,
   ScheduleState,
   SortCriterion,
   StatusFilter,
@@ -61,9 +63,6 @@ export function compareTasks(a: TaskNode, b: TaskNode, sortBy: SortCriterion): n
   return a.createdAt.localeCompare(b.createdAt);
 }
 
-/**
- * Compiles a safe RegExp for `/` search or falls back to substring match if invalid regex syntax
- */
 export function buildMatcher(regexQuery: string, filterQuery: string): {
   matches: (task: TaskNode) => boolean;
   regexError: string | null;
@@ -96,10 +95,6 @@ export function buildMatcher(regexQuery: string, filterQuery: string): {
   };
 }
 
-/**
- * Returns flattened visible rows for the Center Schedule Workspace, preserving
- * Project -> Category -> Parent Task -> Nested Subtasks (up to 3 levels deep).
- */
 export function selectVisibleTaskRows(state: ScheduleState): {
   rows: VisibleTaskRow[];
   regexError: string | null;
@@ -107,7 +102,6 @@ export function selectVisibleTaskRows(state: ScheduleState): {
   const { matches, regexError } = buildMatcher(state.regexQuery, state.filterQuery);
   const allTasks = Object.values(state.tasks);
 
-  // Filter by selected project & category
   const scopedTasks = allTasks.filter((t) => {
     if (t.projectId !== state.selectedProjectId) return false;
     if (state.selectedCategoryId !== 'ALL' && t.categoryId !== state.selectedCategoryId) {
@@ -116,7 +110,6 @@ export function selectVisibleTaskRows(state: ScheduleState): {
     return true;
   });
 
-  // Group children by parentId
   const childrenMap = new Map<string | null, TaskNode[]>();
   for (const t of scopedTasks) {
     const key = t.parentId;
@@ -129,7 +122,6 @@ export function selectVisibleTaskRows(state: ScheduleState): {
     list.sort((a, b) => compareTasks(a, b, state.sortBy));
   }
 
-  // Determine which nodes match filters or have matching descendants
   const nodeMatchesOrHasMatchingDescendant = (node: TaskNode): boolean => {
     const statusOk =
       state.statusFilter === 'ALL' ||
@@ -172,15 +164,13 @@ export function selectVisibleTaskRows(state: ScheduleState): {
   return { rows, regexError };
 }
 
-/**
- * Returns flattened navigation items for the Left Panel (Project -> Categories)
- */
 export interface LeftNavItem {
   kind: 'PROJECT' | 'CATEGORY_ALL' | 'CATEGORY';
   projectId: string;
   categoryId?: string;
   label: string;
   code?: string;
+  expanded?: boolean;
   count: number;
 }
 
@@ -195,6 +185,7 @@ export function selectLeftNavItems(state: ScheduleState): LeftNavItem[] {
       projectId: proj.id,
       label: proj.name,
       code: proj.code,
+      expanded: proj.expanded,
       count: projTasks.length,
     });
 
@@ -226,9 +217,6 @@ export function selectLeftNavItems(state: ScheduleState): LeftNavItem[] {
   return items;
 }
 
-/**
- * Returns all descendants of a given task up to 3 levels for the Right Inspector Panel
- */
 export function selectTaskSubtree(state: ScheduleState, rootTaskId: string | null): TaskNode[] {
   if (!rootTaskId || !state.tasks[rootTaskId]) return [];
   const result: TaskNode[] = [];
@@ -256,7 +244,19 @@ export type ScheduleAction =
   | { type: 'SET_PANEL_FOCUS'; panel: ActivePanel }
   | { type: 'SET_WORKSPACE_MODE'; mode: WorkspaceMode; keyHint?: string }
   | { type: 'SET_INPUT_MODE'; mode: InputMode; keyHint?: string }
-  | { type: 'SELECT_PROJECT_CATEGORY'; projectId: string; categoryId: string | 'ALL' }
+  | { type: 'TOGGLE_PROJECT_BROWSER'; open?: boolean }
+  | { type: 'TOGGLE_AGENT_PROTOCOL'; open?: boolean }
+  | { type: 'SELECT_PROJECT_CATEGORY'; projectId: string; categoryId: string | 'ALL'; closeBrowser?: boolean }
+  | { type: 'TOGGLE_PROJECT_EXPAND'; projectId: string }
+  | {
+      type: 'REGISTER_NEW_PROJECT';
+      code: string;
+      name: string;
+      localPath: string;
+      stack: string[];
+      description: string;
+      lifecycle?: ProjectLifecycle;
+    }
   | { type: 'SELECT_TASK'; taskId: string }
   | { type: 'ADD_TASK_INLINE'; title: string; priority: Priority; dueDate: string; asSubtask: boolean }
   | { type: 'DELETE_SELECTED_TASK' }
@@ -333,7 +333,6 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         };
       }
 
-      // Default: CENTER panel
       const { rows } = selectVisibleTaskRows(state);
       if (rows.length === 0) return { ...state, lastKeyPressed: keyName };
       const currentIdx = rows.findIndex((r) => r.task.id === state.selectedTaskId);
@@ -410,11 +409,13 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         activeMode: action.mode,
         focusedPanel: 'CENTER',
         inputMode: 'NORMAL',
+        projectBrowserOpen: false,
+        agentProtocolOpen: false,
         lastKeyPressed: action.keyHint ?? (action.mode === 'SCHEDULE' ? 't' : 'c'),
         statusMessage:
           action.mode === 'SCHEDULE'
             ? 'MODE -> SCHEDULE WORKSPACE (Hierarchical Task Architecture)'
-            : 'MODE -> CLI STREAM WORKSPACE (Claude Code Execution & Telemetry Stream)',
+            : 'MODE -> CLI STREAM WORKSPACE (YXB // CMD Execution & Telemetry Stream)',
         cliLogs: appendLog(state, {
           type: 'COMMAND',
           command: action.mode === 'SCHEDULE' ? ':mode schedule' : ':mode cli-stream',
@@ -427,6 +428,8 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       return {
         ...state,
         inputMode: action.mode,
+        projectBrowserOpen: action.mode === 'PROJECT_BROWSER' ? true : false,
+        agentProtocolOpen: action.mode === 'AGENT_PROTOCOL' ? true : false,
         lastKeyPressed: action.keyHint ?? state.lastKeyPressed,
         statusMessage:
           action.mode === 'NORMAL'
@@ -439,21 +442,144 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
             ? '-- REGEX SEARCH (/) -- Type regular expression pattern, Enter/Esc to lock'
             : action.mode === 'FILTER_BAR'
             ? '-- FILTER BAR (i) -- Filter by keyword, priority, or status'
+            : action.mode === 'PROJECT_BROWSER'
+            ? '-- BROWSE PROJECT [p] -- Select any ~/Documents/Github repository or initialize a new one'
+            : action.mode === 'AGENT_PROTOCOL'
+            ? '-- AGENT PROTOCOL [g] -- Global Multi-Agent Sync Rules & CLI Commands'
             : '-- CLI PROMPT --',
       };
     }
 
+    case 'TOGGLE_PROJECT_BROWSER': {
+      const nextOpen = action.open ?? !state.projectBrowserOpen;
+      return {
+        ...state,
+        projectBrowserOpen: nextOpen,
+        agentProtocolOpen: false,
+        inputMode: nextOpen ? 'PROJECT_BROWSER' : 'NORMAL',
+        lastKeyPressed: 'p',
+        statusMessage: nextOpen
+          ? `BROWSE PROJECT MENU OPEN (${state.projects.length} repositories in ~/Documents/Github)`
+          : '-- NORMAL MODE --',
+      };
+    }
+
+    case 'TOGGLE_AGENT_PROTOCOL': {
+      const nextOpen = action.open ?? !state.agentProtocolOpen;
+      return {
+        ...state,
+        agentProtocolOpen: nextOpen,
+        projectBrowserOpen: false,
+        inputMode: nextOpen ? 'AGENT_PROTOCOL' : 'NORMAL',
+        lastKeyPressed: 'g',
+        statusMessage: nextOpen
+          ? 'AGENT CONTEXT PROTOCOL OPEN — Global rules active for all future agents'
+          : '-- NORMAL MODE --',
+      };
+    }
+
+    case 'TOGGLE_PROJECT_EXPAND': {
+      return {
+        ...state,
+        projects: state.projects.map((p) =>
+          p.id === action.projectId ? { ...p, expanded: !p.expanded } : p
+        ),
+      };
+    }
+
     case 'SELECT_PROJECT_CATEGORY': {
+      const updatedProjects = state.projects.map((p) =>
+        p.id === action.projectId ? { ...p, expanded: true } : p
+      );
+      const selectedProj = updatedProjects.find((p) => p.id === action.projectId);
       const tempState: ScheduleState = {
         ...state,
+        projects: updatedProjects,
         selectedProjectId: action.projectId,
         selectedCategoryId: action.categoryId,
-        statusMessage: `Selected project ${action.projectId} / category ${action.categoryId}`,
+        projectBrowserOpen: action.closeBrowser ? false : state.projectBrowserOpen,
+        inputMode: action.closeBrowser ? 'NORMAL' : state.inputMode,
+        statusMessage: `SWITCHED WORKSPACE -> ${selectedProj?.localPath ?? action.projectId} (${selectedProj?.name ?? ''})`,
       };
       const { rows } = selectVisibleTaskRows(tempState);
       return {
         ...tempState,
         selectedTaskId: rows[0]?.task.id ?? null,
+      };
+    }
+
+    case 'REGISTER_NEW_PROJECT': {
+      const cleanName = action.name.trim();
+      const cleanCode = action.code.trim().toUpperCase() || 'NEW-PROJ';
+      if (!cleanName) return state;
+
+      const slug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const newProjId = `proj-${slug}-${Date.now().toString().slice(-3)}`;
+      const newCatId = `cat-${slug}-core`;
+      const newTaskId = `task-${slug}-100`;
+      const now = new Date().toISOString();
+
+      const newProj: Project = {
+        id: newProjId,
+        code: cleanCode,
+        name: cleanName,
+        description: action.description.trim() || `Workspace repository at ${action.localPath}`,
+        localPath: action.localPath.trim() || `~/Documents/Github/${slug}`,
+        stack: action.stack.length > 0 ? action.stack : ['Astro', 'TypeScript'],
+        lifecycle: action.lifecycle ?? 'ACTIVE',
+        lastAgentSync: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        order: state.projects.length,
+        expanded: true,
+      };
+
+      const newCategory: Category = {
+        id: newCatId,
+        projectId: newProjId,
+        name: 'Architecture & Core',
+        slug: 'arch-core',
+        order: 0,
+      };
+
+      const initialTask: TaskNode = {
+        id: newTaskId,
+        projectId: newProjId,
+        categoryId: newCatId,
+        parentId: null,
+        depth: 0,
+        title: `Initialize ${cleanName} architecture & register with YXB // CMD`,
+        notes: `Initialized at ${newProj.localPath} with stack [${newProj.stack.join(', ')}].`,
+        priority: 'HIGH',
+        status: 'IN_PROGRESS',
+        dueDate: '2026-11-12',
+        isMilestone: true,
+        estimatedMinutes: 60,
+        manualOrder: 0,
+        expanded: true,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      return {
+        ...state,
+        projects: [...state.projects, newProj],
+        categories: [...state.categories, newCategory],
+        tasks: {
+          ...state.tasks,
+          [newTaskId]: initialTask,
+        },
+        selectedProjectId: newProjId,
+        selectedCategoryId: 'ALL',
+        selectedTaskId: newTaskId,
+        projectBrowserOpen: false,
+        inputMode: 'NORMAL',
+        statusMessage: `INITIALIZED PROJECT [${cleanCode}] at ${newProj.localPath}`,
+        cliLogs: appendLog(state, {
+          type: 'MUTATION',
+          toolName: 'RegisterProject',
+          summary: `Initialized new project "${cleanName}" (${cleanCode}) at ${newProj.localPath}`,
+          detail: `stack: [${newProj.stack.join(', ')}] | initial_milestone: ${newTaskId}`,
+          accent: true,
+        }),
       };
     }
 
@@ -484,18 +610,16 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
           ? state.selectedCategoryId
           : selectedTask?.categoryId ??
             state.categories.find((c) => c.projectId === state.selectedProjectId)?.id ??
-            'cat-scheduler';
+            'cat-cmd-core';
 
-      // Enforce max 3 levels of nested subtasks (depth: 0 | 1 | 2 | 3)
       let parentId: string | null = null;
       let depth: 0 | 1 | 2 | 3 = 0;
 
-      if (action.asSubtask && selectedTask) {
+      if (action.asSubtask && selectedTask && selectedTask.projectId === state.selectedProjectId) {
         if (selectedTask.depth < 3) {
           parentId = selectedTask.id;
           depth = (selectedTask.depth + 1) as 1 | 2 | 3;
         } else {
-          // Already at max depth 3 -> create as sibling at depth 3 under the same parent
           parentId = selectedTask.parentId;
           depth = 3;
         }
@@ -519,7 +643,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         parentId,
         depth,
         title: cleanTitle,
-        notes: `Created via inline TUI prompt at depth L${depth}.`,
+        notes: `Created via inline YXB // CMD prompt at depth L${depth}.`,
         priority: action.priority,
         status: 'QUEUED',
         dueDate: action.dueDate || '2026-11-10',
@@ -547,7 +671,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
           type: 'MUTATION',
           toolName: 'CreateTaskNode',
           summary: `Added L${depth} ${depth === 0 ? 'Parent Task' : 'Subtask'} "${cleanTitle}" [${action.priority}]`,
-          detail: `id: ${newId} | parent: ${parentId ?? 'ROOT'} | due: ${newTask.dueDate}`,
+          detail: `id: ${newId} | project: ${state.selectedProjectId} | parent: ${parentId ?? 'ROOT'}`,
           accent: true,
         }),
       };
@@ -571,7 +695,6 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       const { rows } = selectVisibleTaskRows(state);
       const currentRowIdx = rows.findIndex((r) => r.task.id === targetId);
 
-      // Collect target + all descendants
       const toDelete = new Set<string>([targetId]);
       let added = true;
       while (added) {
@@ -712,7 +835,6 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       const target = state.tasks[targetId];
       const keyName = action.direction === 'DOWN' ? 'J' : 'K';
 
-      // Find all siblings sharing the same parentId and categoryId within the project
       const siblings = Object.values(state.tasks)
         .filter(
           (t) =>
@@ -733,7 +855,6 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         };
       }
 
-      // Normalize manualOrder on all siblings and swap idx with swapIdx
       const reordered = [...siblings];
       const [moved] = reordered.splice(idx, 1);
       reordered.splice(swapIdx, 0, moved);
@@ -814,7 +935,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       const withCmdLog = appendLog(state, {
         type: 'COMMAND',
         command: raw,
-        summary: `> ${raw}`,
+        summary: `yxb > ${raw}`,
         accent: true,
       });
 
@@ -827,7 +948,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               id: `log-${Date.now()}`,
               timestamp: nowTimeStr(),
               type: 'SYSTEM',
-              summary: 'Terminal stream buffer cleared.',
+              summary: 'YXB // CMD stream buffer cleared.',
             },
           ],
           statusMessage: 'CLI stream buffer cleared',
@@ -844,10 +965,36 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               timestamp: nowTimeStr(),
               type: 'TOOL_CALL',
               toolName: 'HelpManual',
-              summary: 'Available CLI commands: /stats, /milestones, /schedule, /add <title>, /reset, /clear',
-              detail: 'Global Vim Keybindings: [j/k] up/down | [h/l] left/right panels | [J/K] priority shift | [a] add | [d] delete | [e] edit | [m] milestone | [/] regex | [t/c] switch view',
+              summary: 'Available CLI commands: /projects, /protocol, /stats, /add <title>, /reset, /clear',
+              detail: 'Global Vim Keybindings: [p] Browse Projects | [g] Agent Protocol | [j/k] Nav | [h/l] Panels | [J/K] Priority | [a/d/e] CRUD | [m] Milestone | [/] Regex | [t/c] Mode',
             },
           ],
+        };
+      }
+
+      if (lower === 'projects' || lower === '/projects') {
+        return {
+          ...state,
+          cliLogs: [
+            ...withCmdLog,
+            {
+              id: `log-${Date.now()}-p`,
+              timestamp: nowTimeStr(),
+              type: 'TOOL_CALL',
+              toolName: 'ListWorkspaceRepos',
+              summary: `${state.projects.length} repositories registered in ~/Documents/Github:`,
+              detail: state.projects.map((p) => `${p.code} (${p.localPath})`).join(' | '),
+            },
+          ],
+        };
+      }
+
+      if (lower === 'protocol' || lower === '/protocol') {
+        return {
+          ...state,
+          agentProtocolOpen: true,
+          inputMode: 'AGENT_PROTOCOL',
+          cliLogs: withCmdLog,
         };
       }
 
@@ -866,7 +1013,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
               timestamp: nowTimeStr(),
               type: 'TOOL_CALL',
               toolName: 'TelemetryAudit',
-              summary: `Total Nodes: ${all.length} | Completed: ${done} | In-Progress: ${inProg} | Blocked: ${blocked} | Milestones: ${milestones}`,
+              summary: `Repos: ${state.projects.length} | Total Tasks: ${all.length} | Completed: ${done} | In-Progress: ${inProg} | Blocked: ${blocked} | Milestones: ${milestones}`,
               detail: `Active Project: ${state.selectedProjectId} | Active Sort: ${state.sortBy}`,
             },
           ],
@@ -901,7 +1048,7 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
             id: `log-${Date.now()}-r`,
             timestamp: nowTimeStr(),
             type: 'SYSTEM',
-            summary: `Executed instruction "${raw}" — 0 errors. Type /help for built-in TUI commands.`,
+            summary: `Executed instruction "${raw}" — 0 errors. Type /help or /projects for built-in YXB // CMD commands.`,
           },
         ],
       };

@@ -17,7 +17,7 @@ export function useKeybindings(
           target.tagName === 'SELECT' ||
           target.isContentEditable);
 
-      // Escape always returns to NORMAL mode and blurs active inputs
+      // Escape always returns to NORMAL mode and closes modals/dropdowns
       if (e.key === 'Escape') {
         e.preventDefault();
         if (target && typeof target.blur === 'function') {
@@ -27,12 +27,10 @@ export function useKeybindings(
         return;
       }
 
-      // If user is typing inside an inline input/search/editor, don't hijack single-letter keys
       if (isTextInput || state.inputMode !== 'NORMAL') {
         return;
       }
 
-      // Ignore if Ctrl / Meta / Alt are held
       if (e.metaKey || e.ctrlKey || e.altKey) {
         return;
       }
@@ -65,16 +63,26 @@ export function useKeybindings(
         }
 
         case 'J': {
-          // Shift+J: Move task down in priority order
           e.preventDefault();
           dispatch({ type: 'REORDER_TASK_PRIORITY', direction: 'DOWN' });
           break;
         }
 
         case 'K': {
-          // Shift+K: Move task up in priority order
           e.preventDefault();
           dispatch({ type: 'REORDER_TASK_PRIORITY', direction: 'UP' });
+          break;
+        }
+
+        case 'p': {
+          e.preventDefault();
+          dispatch({ type: 'TOGGLE_PROJECT_BROWSER' });
+          break;
+        }
+
+        case 'g': {
+          e.preventDefault();
+          dispatch({ type: 'TOGGLE_AGENT_PROTOCOL' });
           break;
         }
 

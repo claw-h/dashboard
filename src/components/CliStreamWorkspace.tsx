@@ -32,13 +32,19 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
       {/* CLI Stream Header Banner */}
       <div className="px-3 py-2 bg-[#18181B] border-b border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[#E05C36] font-bold">●</span>
+          <span className="text-[#E05C36] font-bold">◈</span>
           <span className="font-bold text-[#F4F4F5]">
-            CLAUDE CODE // INTERACTIVE TUI TELEMETRY &amp; DIFF STREAM
+            YXB // CMD — INTERACTIVE AGENT TELEMETRY &amp; DIFF STREAM
           </span>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-          <span>Press [t] to return to Schedule Mode</span>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: 'EXECUTE_CLI_COMMAND', rawCommand: '/projects' })}
+            className="px-2 py-0.5 bg-zinc-900 border border-zinc-700 hover:border-[#E05C36] text-zinc-300"
+          >
+            /projects
+          </button>
           <button
             type="button"
             onClick={() => dispatch({ type: 'EXECUTE_CLI_COMMAND', rawCommand: '/stats' })}
@@ -60,13 +66,13 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
       <div className="flex-1 overflow-y-auto tui-scroll p-3 space-y-2.5">
         <div className="p-2.5 border border-zinc-800 bg-[#18181B]/60 text-zinc-400 text-[11px] leading-relaxed">
           <div className="text-[#F4F4F5] font-bold mb-1">
-            ┌── Claude Code Local Agent Session (tty001) ──┐
+            ┌── YXB // CMD Sovereign Agent Session (tty001 · ~/Documents/Github) ──┐
           </div>
           <div>
             Every schedule mutation, priority shift (<span className="text-[#E05C36]">J/K</span>),
-            milestone toggle (<span className="text-[#E05C36]">m</span>), and inline insertion (
-            <span className="text-[#E05C36]">a</span>) streams structured tool calls here in real
-            time.
+            milestone toggle (<span className="text-[#E05C36]">m</span>), project mount (
+            <span className="text-[#E05C36]">p</span>), and headless agent CLI sync streams
+            structured telemetry here.
           </div>
         </div>
 
@@ -111,7 +117,7 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
         onSubmit={handleCommandSubmit}
         className="p-2.5 bg-[#18181B] border-t border-zinc-800 flex items-center gap-2"
       >
-        <span className="text-[#E05C36] font-bold">claude &gt;</span>
+        <span className="text-[#E05C36] font-bold">yxb &gt;</span>
         <input
           ref={inputRef}
           type="text"
@@ -119,7 +125,7 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
           onFocus={() => dispatch({ type: 'SET_INPUT_MODE', mode: 'CLI_INPUT' })}
           onBlur={() => dispatch({ type: 'SET_INPUT_MODE', mode: 'NORMAL' })}
           onChange={(e) => setCommandInput(e.target.value)}
-          placeholder="Type /help, /stats, /add <task title>, or /clear..."
+          placeholder="Type /projects, /protocol, /stats, /add <task title>, or /clear..."
           className="flex-1 bg-[#0F0F11] border border-zinc-800 focus:border-[#E05C36] px-2.5 py-1.5 text-xs text-[#F4F4F5] placeholder-zinc-600 outline-none font-mono"
         />
         <button

@@ -10,8 +10,10 @@ import {
   saveScheduleState,
   STORAGE_KEY,
 } from '../state/storage';
+import { AgentProtocolModal } from './AgentProtocolModal';
 import { CenterWorkspace } from './CenterWorkspace';
 import { LeftPanelTree } from './LeftPanelTree';
+import { ProjectBrowserDropdown } from './ProjectBrowserDropdown';
 import { RightInspectorPanel } from './RightInspectorPanel';
 import { StatusBarKeyHints } from './StatusBarKeyHints';
 import { TopHeaderBar } from './TopHeaderBar';
@@ -20,7 +22,7 @@ export const CommandCenter: React.FC = () => {
   const [state, dispatch] = useReducer(scheduleReducer, undefined, createInitialSeedState);
   const [hydrated, setHydrated] = useState(false);
 
-  // Hydrate from LocalStorage on mount
+  // Hydrate from LocalStorage & merge canonical ~/Documents/Github registry on mount
   useEffect(() => {
     const stored = loadScheduleState();
     dispatch({ type: 'SYNC_FROM_STORAGE', state: stored });
@@ -75,9 +77,15 @@ export const CommandCenter: React.FC = () => {
   );
 
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#0F0F11] text-[#F4F4F5] font-mono">
-      {/* Top Claude Code Session & Filter Header */}
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#0F0F11] text-[#F4F4F5] font-mono relative">
+      {/* Top YXB // CMD Session, Browse Project Breadcrumb & Filter Header */}
       <TopHeaderBar state={state} dispatch={dispatch} regexError={regexError} />
+
+      {/* Browse Project [p] Mega-Dropdown attached to ~/workspace breadcrumb */}
+      <ProjectBrowserDropdown state={state} dispatch={dispatch} />
+
+      {/* Global Agent Context Protocol Modal [g] */}
+      <AgentProtocolModal state={state} dispatch={dispatch} />
 
       {/* Persistent 3-Column Split View separated by 1px solid border-zinc-800 */}
       <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">

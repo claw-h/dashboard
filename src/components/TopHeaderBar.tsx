@@ -33,35 +33,69 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
   const activeProject = state.projects.find((p) => p.id === state.selectedProjectId);
 
   return (
-    <header className="h-11 bg-[#0F0F11] border-b border-zinc-800 px-3 flex items-center justify-between gap-3 text-xs select-none shrink-0">
-      {/* Left: Brand & Session Breadcrumb */}
-      <div className="flex items-center gap-2.5 min-w-0">
-        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#18181B] border border-zinc-800">
-          <span className="text-[#E05C36] font-bold">✻</span>
-          <span className="font-bold tracking-wider text-[#F4F4F5]">CLAUDE CODE</span>
-          <span className="text-zinc-500">v2.4</span>
+    <header className="h-11 bg-[#0F0F11] border-b border-zinc-800 px-3 flex items-center justify-between gap-2.5 text-xs select-none shrink-0">
+      {/* Left: Bespoke YXB // CMD Emblem & Interactive ~/workspace Breadcrumb Dropdown Trigger */}
+      <div className="flex items-center gap-2 min-w-0">
+        {/* Custom YXB // CMD Geometric Brand Badge */}
+        <div className="flex items-center gap-2 px-2.5 py-1 bg-[#18181B] border border-zinc-800 shrink-0">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="shrink-0"
+            aria-hidden="true"
+          >
+            <polygon
+              points="12,2 22,12 12,22 2,12"
+              stroke="#E05C36"
+              strokeWidth="2"
+              fill="rgba(224,92,54,0.18)"
+            />
+            <circle cx="12" cy="12" r="2.5" fill="#F4F4F5" />
+          </svg>
+          <span className="font-bold tracking-wider text-[#F4F4F5]">
+            YXB <span className="text-[#E05C36]">//</span> CMD
+          </span>
+          <span className="text-[10px] px-1 bg-zinc-900 border border-zinc-700 text-zinc-400">
+            v2.5
+          </span>
         </div>
 
-        <span className="text-zinc-600">│</span>
+        <span className="text-zinc-700">│</span>
 
-        <div className="hidden sm:flex items-center gap-1 text-zinc-400 truncate">
-          <span className="text-zinc-500">~/workspace/</span>
-          <span className="text-[#F4F4F5] font-semibold">
-            {activeProject?.code.toLowerCase() ?? 'root'}
+        {/* Interactive ~/workspace Breadcrumb -> Opens Browse Project Mega-Menu [p] */}
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'TOGGLE_PROJECT_BROWSER' })}
+          className={`group flex items-center gap-1.5 px-2.5 py-1 border transition-colors truncate ${
+            state.projectBrowserOpen
+              ? 'border-[#E05C36] bg-[#E05C36]/15 text-[#F4F4F5]'
+              : 'border-zinc-800 bg-[#18181B]/70 hover:border-[#E05C36] text-zinc-300'
+          }`}
+          title="Press [p] or click to browse all ~/Documents/Github repositories"
+        >
+          <span className="text-[#E05C36] font-bold">[p]</span>
+          <span className="text-zinc-500 hidden sm:inline">~/workspace/</span>
+          <span className="text-[#F4F4F5] font-bold">
+            {activeProject?.code ?? 'ROOT'}
           </span>
           {state.selectedCategoryId !== 'ALL' && (
             <>
               <span className="text-zinc-600">/</span>
-              <span className="text-[#E05C36]">
+              <span className="text-[#E05C36] truncate max-w-[100px]">
                 {state.categories.find((c) => c.id === state.selectedCategoryId)?.slug}
               </span>
             </>
           )}
-        </div>
+          <span className="ml-1 px-1.5 py-0.2 bg-[#0F0F11] border border-zinc-700 group-hover:border-[#E05C36] text-[10px] text-[#E05C36] font-semibold">
+            Browse ({state.projects.length}) ▾
+          </span>
+        </button>
       </div>
 
       {/* Center: Filter Bar (i) & Regex Search (/) */}
-      <div className="flex items-center gap-2 flex-1 max-w-xl">
+      <div className="hidden md:flex items-center gap-2 flex-1 max-w-lg">
         {/* Filter Input [i] */}
         <div
           className={`flex items-center flex-1 bg-[#18181B] border px-2 py-1 transition-colors ${
@@ -72,7 +106,6 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
           onClick={() => dispatch({ type: 'SET_INPUT_MODE', mode: 'FILTER_BAR', keyHint: 'i' })}
         >
           <span className="text-[#E05C36] font-bold mr-1.5">[i]</span>
-          <span className="text-zinc-500 mr-1">filter:</span>
           <input
             ref={filterInputRef}
             type="text"
@@ -84,7 +117,7 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
                 dispatch({ type: 'SET_INPUT_MODE', mode: 'NORMAL' });
               }
             }}
-            placeholder="keyword / status..."
+            placeholder="filter tasks..."
             className="bg-transparent outline-none w-full text-[#F4F4F5] placeholder-zinc-600 text-xs font-mono"
           />
           {state.filterQuery && (
@@ -94,7 +127,6 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
                 dispatch({ type: 'SET_FILTER_QUERY', query: '' });
               }}
               className="text-zinc-500 hover:text-[#E05C36] ml-1"
-              title="Clear filter"
             >
               ×
             </button>
@@ -125,7 +157,7 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
                 dispatch({ type: 'SET_INPUT_MODE', mode: 'NORMAL' });
               }
             }}
-            placeholder="regex pattern..."
+            placeholder="regex..."
             className="bg-transparent outline-none w-full text-[#F4F4F5] placeholder-zinc-600 text-xs font-mono px-0.5"
           />
           <span className="text-zinc-500">/i</span>
@@ -136,7 +168,6 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
                 dispatch({ type: 'SET_REGEX_QUERY', query: '' });
               }}
               className="text-zinc-500 hover:text-[#E05C36] ml-1"
-              title="Clear regex"
             >
               ×
             </button>
@@ -144,8 +175,22 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
         </div>
       </div>
 
-      {/* Right: Workspace Mode Switcher (t / c) & Telemetry Counters */}
-      <div className="flex items-center gap-2">
+      {/* Right: Agent Context Protocol [g], Mode Switcher [t/c] & Telemetry */}
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'TOGGLE_AGENT_PROTOCOL' })}
+          className={`px-2.5 py-1 text-xs font-mono border transition-colors flex items-center gap-1.5 ${
+            state.agentProtocolOpen
+              ? 'bg-[#E05C36] text-[#0F0F11] border-[#E05C36] font-bold'
+              : 'bg-[#18181B] border-zinc-800 text-zinc-300 hover:border-[#E05C36] hover:text-[#F4F4F5]'
+          }`}
+          title="View Global Agent Context & CLI Sync Protocol [g]"
+        >
+          <span className="text-[#E05C36] font-bold">[g]</span>
+          <span className="hidden lg:inline">AGENT PROTOCOL</span>
+        </button>
+
         <div className="flex items-center border border-zinc-800 bg-[#18181B]">
           <button
             type="button"
@@ -173,7 +218,7 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({
           </button>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 px-2 py-1 bg-[#18181B] border border-zinc-800 text-zinc-400">
+        <div className="hidden xl:flex items-center gap-2 px-2 py-1 bg-[#18181B] border border-zinc-800 text-zinc-400">
           <span>
             DONE <strong className="text-[#F4F4F5]">{completedCount}/{allTasks.length}</strong>
           </span>
