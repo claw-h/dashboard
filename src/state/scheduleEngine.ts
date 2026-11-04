@@ -1131,11 +1131,14 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
       ) {
         const manualVisual = [
           '╔══════════════════════════════════════════════════════════════════════════════════════════╗',
-          '║  ◈ YXB // CMD — GLOBAL & LOCAL SCOPED AGENT COMMAND CENTER (v3.2 VISUAL MANUAL)          ║',
-          '║  Triggers:  yxb -?   │   yxb -help   │   yxb --help   │   -?   │   -help                 ║',
+          '║  ██╗   ██╗██╗  ██╗██████╗   // CMD [Y2K.SYS.v3.0] :: SOVEREIGN AGENTIC SCHEDULER         ║',
+          '║  ╚██╗ ██╔╝╚██╗██╔╝██╔══██╗  ◈ Local & Global CWD-Scoped Command Center                   ║',
+          '║   ╚████╔╝  ╚███╔╝ ██████╦╝  Triggers : yxb -?  │  yxb -help  │  -?  │  -help             ║',
+          '║    ╚██╔╝   ██╔██╗ ██╔══██╗  Daemon   : ~/.local/bin/yxb ◄──► <repo>/TASKS.md (11/11)     ║',
+          '║     ██║   ██╔╝ ██╗██████╦╝  Remote   : github.com/claw-h/dashboard (Phone & CLI Sync)    ║',
           '╚══════════════════════════════════════════════════════════════════════════════════════════╝',
           '',
-          '┌── 01. SYSTEM ARCHITECTURE & 3-PANEL TOPOLOGY ────────────────────────────────────────────┐',
+          '┌── 01 // SYSTEM ARCHITECTURE & 3-PANEL TOPOLOGY ──────────────────────────────────────────┐',
           '│                                                                                          │',
           '│  ┌──────────────────────┐    ┌───────────────────────────┐    ┌────────────────────────┐ │',
           '│  │ 01. WORKSPACE TREE   │◄──►│ 02. SCHEDULE / CLI STREAM │◄──►│ 03. TASK COMPOSER +    │ │',

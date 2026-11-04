@@ -17,13 +17,15 @@ const DASHBOARD_ROOT = path.resolve(__dirname, '..');
 const REGISTRY_PATH = path.resolve(DASHBOARD_ROOT, 'src/data/workspaceRegistry.json');
 const HOME_DIR = os.homedir();
 
-// ANSI Color Codes for rich terminal visuals
+// ANSI Color Codes & Truecolor Y2K Molten Ember Gradient Engine
 const C = {
   reset: '\x1b[0m',
   bold: '\x1b[1m',
   dim: '\x1b[2m',
   clay: '\x1b[38;2;224;92;54m',
   orange: '\x1b[38;2;234;88;12m',
+  crimson: '\x1b[38;2;220;38;38m',
+  emberDark: '\x1b[38;2;153;27;27m',
   white: '\x1b[38;2;244;244;245m',
   muted: '\x1b[38;2;161;161;170m',
   zinc: '\x1b[38;2;113;113;122m',
@@ -31,6 +33,50 @@ const C = {
   cyan: '\x1b[38;2;56;189;248m',
   amber: '\x1b[38;2;251;191;36m',
 };
+
+const EMBER_STOPS = [
+  [140, 29, 25],   // deep cooling magma
+  [205, 48, 32],   // crimson ember
+  [224, 92, 54],   // signature clay
+  [249, 128, 36],  // molten orange
+  [253, 205, 75],  // hot amber core
+  [234, 88, 12],   // lava crest
+  [185, 38, 28],   // dark ember trough
+];
+
+function sampleEmberRgb(t) {
+  const wrapped = ((t % 1) + 1) % 1;
+  const scaled = wrapped * (EMBER_STOPS.length - 1);
+  const idx = Math.floor(scaled);
+  const frac = scaled - idx;
+  const a = EMBER_STOPS[idx];
+  const b = EMBER_STOPS[Math.min(EMBER_STOPS.length - 1, idx + 1)];
+  // Smoothstep interpolation for viscous lava feel
+  const s = frac * frac * (3 - 2 * frac);
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * s),
+    Math.round(a[1] + (b[1] - a[1]) * s),
+    Math.round(a[2] + (b[2] - a[2]) * s),
+  ];
+}
+
+function emberGradientText(str, phase = 0, freq = 0.045, rowShift = 0) {
+  let out = '';
+  let visIdx = 0;
+  for (const ch of str) {
+    if (ch === ' ') {
+      out += ch;
+      visIdx++;
+      continue;
+    }
+    const wave =
+      Math.sin((visIdx * freq + rowShift * 0.22 - phase) * Math.PI * 2) * 0.5 + 0.5;
+    const [r, g, b] = sampleEmberRgb(wave);
+    out += `\x1b[38;2;${r};${g};${b}m${ch}`;
+    visIdx++;
+  }
+  return out + C.reset;
+}
 
 function expandTilde(p) {
   if (!p) return '';
@@ -287,66 +333,153 @@ function printProjectTree(registry, proj) {
   printChildren(null, '  ');
 }
 
-function printComprehensiveVisualHelp(registry, scopedProj) {
+function renderY2kEmberBanner(phase = 0) {
+  const topBorder = emberGradientText(
+    '╔══════════════════════════════════════════════════════════════════════════════════════════╗',
+    phase,
+    0.018,
+    0
+  );
+  const botBorder = emberGradientText(
+    '╚══════════════════════════════════════════════════════════════════════════════════════════╝',
+    phase,
+    0.018,
+    6
+  );
+  const lEdge = (row) => emberGradientText('║', phase, 0.02, row);
+  const rEdge = (row) => emberGradientText('║', phase, 0.02, row + 3);
+
+  const yxbRow1 = emberGradientText('██╗   ██╗██╗  ██╗██████╗ ', phase, 0.065, 1);
+  const yxbRow2 = emberGradientText('╚██╗ ██╔╝╚██╗██╔╝██╔══██╗', phase, 0.065, 2);
+  const yxbRow3 = emberGradientText(' ╚████╔╝  ╚███╔╝ ██████╦╝', phase, 0.065, 3);
+  const yxbRow4 = emberGradientText('  ╚██╔╝   ██╔██╗ ██╔══██╗', phase, 0.065, 4);
+  const yxbRow5 = emberGradientText('   ██║   ██╔╝ ██╗██████╦╝', phase, 0.065, 5);
+
+  const slashTag = emberGradientText('// CMD [Y2K.SYS.v3.0]', phase + 0.25, 0.04, 1);
+  const pulseGlyph = emberGradientText('◈', phase * 2, 0.1, 2);
+
+  return [
+    topBorder,
+    `${lEdge(1)}  ${C.bold}${yxbRow1}${C.reset}  ${C.bold}${slashTag}${C.reset} ${C.zinc}:: SOVEREIGN AGENTIC SCHEDULER${C.reset}     ${rEdge(1)}`,
+    `${lEdge(2)}  ${C.bold}${yxbRow2}${C.reset}  ${pulseGlyph} ${C.white}Local & Global CWD-Scoped Command Center${C.reset}             ${rEdge(2)}`,
+    `${lEdge(3)}  ${C.bold}${yxbRow3}${C.reset}  ${C.muted}Triggers :${C.reset} ${C.amber}yxb -?${C.reset} ${C.zinc}│${C.reset} ${C.amber}yxb -help${C.reset} ${C.zinc}│${C.reset} ${C.amber}yxb --help${C.reset} ${C.zinc}│${C.reset} ${C.amber}yxb help${C.reset}        ${rEdge(3)}`,
+    `${lEdge(4)}  ${C.bold}${yxbRow4}${C.reset}  ${C.muted}Daemon   :${C.reset} ${C.cyan}~/.local/bin/yxb${C.reset} ${C.zinc}◄──►${C.reset} ${C.green}<repo>/TASKS.md (11/11)${C.reset}   ${rEdge(4)}`,
+    `${lEdge(5)}  ${C.bold}${yxbRow5}${C.reset}  ${C.muted}Remote   :${C.reset} ${C.zinc}github.com/claw-h/dashboard (Phone & CLI Sync)${C.reset}   ${rEdge(5)}`,
+    botBorder,
+  ].join('\n');
+}
+
+function buildHelpMenuBody(registry, scopedProj, phase = 0.35) {
   const scopeLabel = scopedProj
     ? `LOCAL REPO -> ${scopedProj.code} (${scopedProj.localPath})`
     : `GLOBAL WORKSPACE -> ~/Documents/Github/* (${registry.projects.length} Repos)`;
 
-  console.log(`
-${C.clay}╔══════════════════════════════════════════════════════════════════════════════════════════╗${C.reset}
-${C.clay}║${C.reset}  ${C.clay}◈${C.reset}  ${C.bold}${C.white}YXB // CMD v3.0 — SOVEREIGN AGENTIC COMMAND CENTER & HIERARCHICAL SCHEDULER${C.reset}          ${C.clay}║${C.reset}
-${C.clay}║${C.reset}     ${C.muted}Comprehensive Visual CLI & TUI Architecture Manual  (Triggers: -? | -help | help)${C.reset}    ${C.clay}║${C.reset}
-${C.clay}╚══════════════════════════════════════════════════════════════════════════════════════════╝${C.reset}
+  const sec1Top = emberGradientText(
+    '┌─ 01 // ACTIVE EXECUTION CONTEXT & 3-PANEL TOPOLOGY ──────────────────────────────────────┐',
+    phase,
+    0.016,
+    1
+  );
+  const sec2Top = emberGradientText(
+    '┌─ 02 // CLI COMMAND REFERENCE (LOCAL CWD-SCOPED & GLOBAL MULTI-REPO) ─────────────────────┐',
+    phase,
+    0.016,
+    2
+  );
+  const sec3Top = emberGradientText(
+    '┌─ 03 // SCHOLARLY & VIM-INSPIRED KEYBINDING MATRIX (WEB DASHBOARD) ───────────────────────┐',
+    phase,
+    0.016,
+    3
+  );
+  const secBot = (row) =>
+    emberGradientText(
+      '└──────────────────────────────────────────────────────────────────────────────────────────┘',
+      phase,
+      0.016,
+      row
+    );
+  const bar = emberGradientText('│', phase, 0.05, 2);
+  const yxbTag = emberGradientText('YXB', phase, 0.12, 1);
 
-${C.bold}${C.white}┌─ 01. ACTIVE EXECUTION CONTEXT & TOPOLOGY ────────────────────────────────────────────────┐${C.reset}
-${C.zinc}│${C.reset}  ${C.muted}Active CWD Scope :${C.reset} ${C.clay}${C.bold}${scopeLabel}${C.reset}
-${C.zinc}│${C.reset}  ${C.muted}Global CLI Binary:${C.reset} ${C.cyan}~/.local/bin/yxb${C.reset} ${C.zinc}(Auto-scopes via process.cwd() inside any repo)${C.reset}
-${C.zinc}│${C.reset}  ${C.muted}Canonical Ledger :${C.reset} ${C.cyan}~/Documents/Github/dashboard/src/data/workspaceRegistry.json${C.reset}
-${C.zinc}│${C.reset}  ${C.muted}Per-Repo Mirrors :${C.reset} ${C.green}~/Documents/Github/<repo>/TASKS.md${C.reset} ${C.zinc}(11/11 auto-generated blueprints)${C.reset}
-${C.zinc}│${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}┌────────────────────┐    ┌────────────────────────────────┐    ┌──────────────────────┐${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}│  PANEL 01 [h / p]  │    │      PANEL 02 [t / c / /]      │    │   PANEL 03 [a / l]   │${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}│  Workspace Tree &  │───▶│  Schedule DAG (L0→L1→L2→L3)    │───▶│  Unified Task/Subtask│${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}│  Status Facets     │    │  OR Interactive yxb CLI Stream │    │  Composer & Inspector│${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}└────────────────────┘    └────────────────────────────────┘    └──────────────────────┘${C.reset}
-${C.bold}${C.white}└──────────────────────────────────────────────────────────────────────────────────────────┘${C.reset}
+  return `
+${sec1Top}
+${bar}  ${C.muted}Active CWD Scope :${C.reset} ${emberGradientText(scopeLabel, phase, 0.03, 1)}
+${bar}  ${C.muted}Global CLI Binary:${C.reset} ${C.cyan}~/.local/bin/yxb${C.reset} ${C.zinc}(Auto-scopes via process.cwd() inside any repo)${C.reset}
+${bar}  ${C.muted}Canonical Ledger :${C.reset} ${C.cyan}~/Documents/Github/dashboard/src/data/workspaceRegistry.json${C.reset}
+${bar}  ${C.muted}Per-Repo Mirrors :${C.reset} ${C.green}~/Documents/Github/<repo>/TASKS.md${C.reset} ${C.zinc}(11/11 auto-generated blueprints)${C.reset}
+${bar}
+${bar}  ${emberGradientText('┌────────────────────┐    ┌────────────────────────────────┐    ┌──────────────────────┐', phase, 0.02, 2)}
+${bar}  ${emberGradientText('│  PANEL 01 [h / p]  │    │      PANEL 02 [t / c / /]      │    │   PANEL 03 [a / l]   │', phase, 0.02, 3)}
+${bar}  ${emberGradientText('│  Workspace Tree &  │───▶│  Schedule DAG (L0→L1→L2→L3)    │───▶│  Unified Task/Subtask│', phase, 0.02, 4)}
+${bar}  ${emberGradientText('│  Status Facets     │    │  OR Interactive yxb CLI Stream │    │  Composer & Inspector│', phase, 0.02, 5)}
+${bar}  ${emberGradientText('└────────────────────┘    └────────────────────────────────┘    └──────────────────────┘', phase, 0.02, 6)}
+${secBot(2)}
 
-${C.bold}${C.white}┌─ 02. CLI COMMAND REFERENCE (LOCAL CWD-SCOPED & GLOBAL MULTI-REPO) ───────────────────────┐${C.reset}
-${C.zinc}│${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}${C.bold}A. Inspection & Telemetry${C.reset}
-${C.zinc}│${C.reset}    ${C.cyan}yxb -?${C.reset} ${C.zinc}|${C.reset} ${C.cyan}yxb -help${C.reset}                Display this comprehensive visual architecture manual
-${C.zinc}│${C.reset}    ${C.cyan}yxb status${C.reset} ${C.zinc}|${C.reset} ${C.cyan}yxb tree${C.reset}             Print current repo's Git telemetry & L0..L3 task tree
-${C.zinc}│${C.reset}    ${C.cyan}yxb status -g${C.reset}                     Global audit across all 11 ~/Documents/Github repos
-${C.zinc}│${C.reset}    ${C.cyan}cd <repo-code>${C.reset}                    (Web CLI) Switch local scope (e.g. ${C.amber}cd portyxb${C.reset}, ${C.amber}cd aos-v3${C.reset})
-${C.zinc}│${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}${C.bold}B. Hierarchical Task & Subtask Mutation (L0 -> L1 -> L2 -> L3)${C.reset}
-${C.zinc}│${C.reset}    ${C.cyan}yxb add "<title>" [-p HIGH] [-m]${C.reset}  Create L0 Root Task in current repo (${C.amber}-m${C.reset} marks ◆ Milestone)
-${C.zinc}│${C.reset}    ${C.cyan}yxb sub <parent-id> "<title>"${C.reset}     Spawn nested L1..L3 Subtask under <parent-id>
-${C.zinc}│${C.reset}    ${C.cyan}yxb done <task-id>${C.reset}                Mark task ${C.green}[✓] COMPLETED${C.reset} & regenerate <repo>/TASKS.md
-${C.zinc}│${C.reset}    ${C.cyan}yxb start <task-id>${C.reset}               Mark task ${C.clay}[~] IN_PROGRESS${C.reset}
-${C.zinc}│${C.reset}    ${C.cyan}yxb block <task-id>${C.reset}               Mark task \x1b[31m[!] BLOCKED${C.reset}
-${C.zinc}│${C.reset}    ${C.cyan}yxb log "<summary>"${C.reset}               Append architectural diff log to the YXB // CMD stream
-${C.zinc}│${C.reset}
-${C.zinc}│${C.reset}  ${C.clay}${C.bold}C. Project Registration & Bidirectional Phone / GitHub Cloud Sync${C.reset}
-${C.zinc}│${C.reset}    ${C.cyan}yxb init-project --code "X" ...${C.reset}   Register a new ~/Documents/Github repo on the dashboard
-${C.zinc}│${C.reset}    ${C.cyan}yxb sync${C.reset}                          Scan live Git branches & write TASKS.md to all 11 repos
-${C.zinc}│${C.reset}    ${C.cyan}yxb pull${C.reset}                          Pull remote/phone edits from GitHub (claw-h/dashboard)
-${C.zinc}│${C.reset}    ${C.cyan}yxb push${C.reset}                          Commit & push local registry state to GitHub
-${C.bold}${C.white}└──────────────────────────────────────────────────────────────────────────────────────────┘${C.reset}
+${sec2Top}
+${bar}
+${bar}  ${emberGradientText('▸ A. Inspection & Telemetry', phase, 0.05, 1)}
+${bar}    ${C.amber}yxb -?${C.reset} ${C.zinc}|${C.reset} ${C.amber}yxb -help${C.reset}                Display this ${yxbTag} visual architecture manual
+${bar}    ${C.cyan}yxb status${C.reset} ${C.zinc}|${C.reset} ${C.cyan}yxb tree${C.reset}             Print current repo's Git telemetry & L0..L3 task tree
+${bar}    ${C.cyan}yxb status -g${C.reset}                     Global audit across all 11 ~/Documents/Github repos
+${bar}    ${C.cyan}cd <repo-code>${C.reset}                    (Web CLI) Switch local scope (e.g. ${C.amber}cd portyxb${C.reset}, ${C.amber}cd aos-v3${C.reset})
+${bar}
+${bar}  ${emberGradientText('▸ B. Hierarchical Task & Subtask Mutation (L0 -> L1 -> L2 -> L3)', phase, 0.04, 2)}
+${bar}    ${C.cyan}yxb add "<title>" [-p HIGH] [-m]${C.reset}  Create L0 Root Task in current repo (${C.amber}-m${C.reset} marks ◆ Milestone)
+${bar}    ${C.cyan}yxb sub <parent-id> "<title>"${C.reset}     Spawn nested L1..L3 Subtask under <parent-id>
+${bar}    ${C.cyan}yxb done <task-id>${C.reset}                Mark task ${C.green}[✓] COMPLETED${C.reset} & regenerate <repo>/TASKS.md
+${bar}    ${C.cyan}yxb start <task-id>${C.reset}               Mark task ${C.clay}[~] IN_PROGRESS${C.reset}
+${bar}    ${C.cyan}yxb block <task-id>${C.reset}               Mark task ${C.crimson}[!] BLOCKED${C.reset}
+${bar}    ${C.cyan}yxb log "<summary>"${C.reset}               Append architectural diff log to the ${yxbTag} // CMD stream
+${bar}
+${bar}  ${emberGradientText('▸ C. Project Registration & Bidirectional Phone / GitHub Cloud Sync', phase, 0.04, 3)}
+${bar}    ${C.cyan}yxb init-project --code "X" ...${C.reset}   Register a new ~/Documents/Github repo on the dashboard
+${bar}    ${C.cyan}yxb sync${C.reset}                          Scan live Git branches & write TASKS.md to all 11 repos
+${bar}    ${C.cyan}yxb pull${C.reset}                          Pull remote/phone edits from GitHub (claw-h/dashboard)
+${bar}    ${C.cyan}yxb push${C.reset}                          Commit & push local registry state to GitHub
+${secBot(4)}
 
-${C.bold}${C.white}┌─ 03. SCHOLARLY & VIM-INSPIRED KEYBINDING MATRIX (WEB DASHBOARD) ─────────────────────────┐${C.reset}
-${C.zinc}│${C.reset}  ${C.amber}[j / k]${C.reset}   Move cursor Down / Up          ${C.amber}[a]${C.reset}       Focus Panel 3 Task/Subtask Composer
-${C.zinc}│${C.reset}  ${C.amber}[h / l]${C.reset}   Focus/Collapse Left / Right    ${C.amber}[e]${C.reset}       Focus Panel 3 Live Metadata Editor
-${C.zinc}│${C.reset}  ${C.amber}[J / K]${C.reset}   Shift task Down / Up priority  ${C.amber}[d]${C.reset}       Delete selected task & subtree
-${C.zinc}│${C.reset}  ${C.amber}[p]${C.reset}       Open Browse Project (11 Repos) ${C.amber}[m]${C.reset}       Toggle ◆ MILESTONE flag on node
-${C.zinc}│${C.reset}  ${C.amber}[g]${C.reset}       Open Agent CLI Protocol modal  ${C.amber}[s]${C.reset}       Open ☁ Phone & GitHub Sync Bridge
-${C.zinc}│${C.reset}  ${C.amber}[t / c]${C.reset}   Schedule Mode / CLI Mode       ${C.amber}[/ / i]${C.reset}   Global Regex Search / Keyword Filter
-${C.zinc}│${C.reset}  ${C.amber}[Space]${C.reset}   Cycle task status              ${C.amber}[Tab]${C.reset}     Cycle panel focus / Autocomplete CLI
-${C.bold}${C.white}└──────────────────────────────────────────────────────────────────────────────────────────┘${C.reset}
-`);
+${sec3Top}
+${bar}  ${C.amber}[j / k]${C.reset}   Move cursor Down / Up          ${C.amber}[a]${C.reset}       Focus Panel 3 Task/Subtask Composer
+${bar}  ${C.amber}[h / l]${C.reset}   Focus/Collapse Left / Right    ${C.amber}[e]${C.reset}       Focus Panel 3 Live Metadata Editor
+${bar}  ${C.amber}[J / K]${C.reset}   Shift task Down / Up priority  ${C.amber}[d]${C.reset}       Delete selected task & subtree
+${bar}  ${C.amber}[p]${C.reset}       Open Browse Project (11 Repos) ${C.amber}[m]${C.reset}       Toggle ◆ MILESTONE flag on node
+${bar}  ${C.amber}[g]${C.reset}       Open Agent CLI Protocol modal  ${C.amber}[s]${C.reset}       Open ☁ Phone & GitHub Sync Bridge
+${bar}  ${C.amber}[t / c]${C.reset}   Schedule Mode / CLI Mode       ${C.amber}[/ / i]${C.reset}   Global Regex Search / Keyword Filter
+${bar}  ${C.amber}[Space]${C.reset}   Cycle task status              ${C.amber}[Tab]${C.reset}     Cycle panel focus / Autocomplete CLI
+${secBot(6)}
+`;
 }
 
-function main() {
+async function printComprehensiveVisualHelp(registry, scopedProj) {
+  if (!process.stdout.isTTY) {
+    console.log('\n' + renderY2kEmberBanner(0.28) + buildHelpMenuBody(registry, scopedProj, 0.28));
+    return;
+  }
+
+  // Interactive TTY: Play a smooth 22-frame (~1.05s) molten ember wave across the Y2K "YXB" banner
+  const totalFrames = 22;
+  const frameDelayMs = 46;
+  process.stdout.write('\n\x1b[?25l'); // Hide cursor during ember pulse
+
+  try {
+    for (let f = 0; f < totalFrames; f++) {
+      const phase = (f / totalFrames) * 1.35;
+      const banner = renderY2kEmberBanner(phase);
+      if (f > 0) {
+        process.stdout.write('\x1b[7A\r'); // Move up 7 lines to redraw banner in place
+      }
+      process.stdout.write(banner + '\n');
+      await new Promise((r) => setTimeout(r, frameDelayMs));
+    }
+  } finally {
+    process.stdout.write('\x1b[?25h'); // Restore cursor
+  }
+
+  process.stdout.write(buildHelpMenuBody(registry, scopedProj, 0.35) + '\n');
+}
+
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   const rawFirst = (args._[0] || '').toLowerCase();
   const registry = loadRegistry();
@@ -360,7 +493,7 @@ function main() {
     rawFirst === '?'
   ) {
     const scoped = resolveScopedProject(registry, args.project);
-    printComprehensiveVisualHelp(registry, scoped);
+    await printComprehensiveVisualHelp(registry, scoped);
     return;
   }
 
@@ -679,7 +812,7 @@ function main() {
     return;
   }
 
-  printComprehensiveVisualHelp(registry, resolveScopedProject(registry, args.project));
+  await printComprehensiveVisualHelp(registry, resolveScopedProject(registry, args.project));
 }
 
 main();

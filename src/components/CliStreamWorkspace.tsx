@@ -361,6 +361,30 @@ export const CliStreamWorkspace: React.FC<CliStreamWorkspaceProps> = ({
                       </div>
                     );
                   }
+                  if (entry.toolName === 'YxbVisualManual (-?)') {
+                    const isBannerLine = lineIdx <= 6;
+                    const isSectionHeader =
+                      line.startsWith('┌──') ||
+                      line.startsWith('└──') ||
+                      line.includes('HELP & DIAGNOSTICS') ||
+                      line.includes('HIERARCHICAL TASK MUTATION') ||
+                      line.includes('BIDIRECTIONAL FILESYSTEM') ||
+                      line.includes('NAVIGATION & FOCUS');
+                    return (
+                      <div
+                        key={lineIdx}
+                        className={
+                          isBannerLine
+                            ? 'yxb-cli-ember-logo font-bold'
+                            : isSectionHeader
+                            ? 'yxb-cli-ember-menu font-bold'
+                            : ''
+                        }
+                      >
+                        {line}
+                      </div>
+                    );
+                  }
                   return <div key={lineIdx}>{line}</div>;
                 })}
               </pre>
