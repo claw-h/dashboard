@@ -202,45 +202,50 @@ body {
 @keyframes yxb-cli-ember-shift {
   0% {
     background-position: 0% 50%;
+    color: #e05c36;
   }
   50% {
     background-position: 100% 50%;
+    color: #fbbf24;
   }
   100% {
     background-position: 0% 50%;
+    color: #e05c36;
   }
 }
 
 .yxb-cli-ember-logo {
+  display: inline-block;
   background-image: linear-gradient(
     95deg,
-    #991b1b 0%,
-    #dc2626 20%,
-    #e05c36 42%,
-    #f97316 62%,
-    #fbbf24 78%,
+    #b91c1c 0%,
+    #ef4444 18%,
+    #e05c36 38%,
+    #f97316 58%,
+    #fde047 76%,
     #e05c36 92%,
-    #991b1b 100%
+    #b91c1c 100%
   );
   background-size: 240% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
-  animation: yxb-cli-ember-shift 4.2s linear infinite;
+  -webkit-text-fill-color: transparent;
+  animation: yxb-cli-ember-shift 3.6s linear infinite;
 }
 
 .yxb-cli-ember-menu {
+  display: inline-block;
   background-image: linear-gradient(
     90deg,
-    #b91c1c 0%,
-    #e05c36 35%,
-    #fb923c 55%,
-    #e05c36 78%,
-    #991b1b 100%
+    #dc2626 0%,
+    #e05c36 32%,
+    #fb923c 54%,
+    #fbbf24 72%,
+    #e05c36 100%
   );
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
-  animation: yxb-cli-ember-shift 5.6s ease-in-out infinite;
+  -webkit-text-fill-color: transparent;
+  animation: yxb-cli-ember-shift 4.8s ease-in-out infinite;
 }
